@@ -3,13 +3,29 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Pre-Adjudication Integrity Protocol API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: Auth
+    description: Browser and mobile authentication endpoints.
+  - name: users
+    description: User profile and role management
+  - name: participants
+    description: Participant onboarding and profile
+  - name: checkins
+    description: Daily check-in submissions
+  - name: modules
+    description: Weekly curriculum modules
+  - name: submissions
+    description: Weekly reflection and module submissions
+  - name: feedback
+    description: Mentor-style AI feedback on submissions
+  - name: clinician
+    description: Clinician-only dashboard and participant management
 paths:
   /healthz:
     get:
@@ -24,7 +40,529 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/user:
+    get:
+      tags: [Auth]
+      operationId: getCurrentAuthUser
+      summary: Get the currently authenticated user
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '200':
+          description: Auth status resolved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthUserEnvelope'
+  /login:
+    get:
+      tags: [Auth]
+      operationId: beginBrowserLogin
+      summary: Start the browser OIDC login flow
+      parameters:
+        - name: returnTo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the OIDC authorization endpoint.
+  /callback:
+    get:
+      tags: [Auth]
+      operationId: handleBrowserLoginCallback
+      summary: Complete the browser OIDC login flow
+      parameters:
+        - name: code
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iss
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        '302':
+          description: Redirect on success or failure.
+  /logout:
+    get:
+      tags: [Auth]
+      operationId: logoutBrowserSession
+      summary: Clear the session and begin OIDC logout
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+        - $ref: '#/components/parameters/SessionCookie'
+      responses:
+        '302':
+          description: Redirect to the OIDC provider logout URL.
+  /mobile-auth/token-exchange:
+    post:
+      tags: [Auth]
+      operationId: exchangeMobileAuthorizationCode
+      summary: Exchange a mobile OIDC code for a session token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileTokenExchangeRequest'
+      responses:
+        '200':
+          description: Session created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileTokenExchangeSuccess'
+        '400':
+          description: Missing or invalid required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: Token did not contain usable claims.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Token exchange failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /mobile-auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logoutMobileSession
+      summary: Delete a mobile session token
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationSessionHeader'
+      responses:
+        '200':
+          description: Logout processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutSuccess'
+
+  /users/me:
+    get:
+      tags: [users]
+      operationId: getMyProfile
+      summary: Get current user's profile including role
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+
+  /users/me/role:
+    patch:
+      tags: [users]
+      operationId: updateMyRole
+      summary: Set the current user's role (participant or clinician)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleUpdate'
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid role
+        '401':
+          description: Unauthorized
+
+  /participants/me:
+    get:
+      tags: [participants]
+      operationId: getMyParticipantProfile
+      summary: Get the current participant's profile
+      responses:
+        '200':
+          description: Participant profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantProfile'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a participant
+
+  /participants/me/onboarding:
+    post:
+      tags: [participants]
+      operationId: completeOnboarding
+      summary: Complete participant onboarding and record acknowledgments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingInput'
+      responses:
+        '200':
+          description: Onboarding completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantProfile'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+
+  /participants/me/relationship-status:
+    patch:
+      tags: [participants]
+      operationId: updateRelationshipStatus
+      summary: Update relationship status intake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationshipStatusUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantProfile'
+        '401':
+          description: Unauthorized
+
+  /checkins:
+    get:
+      tags: [checkins]
+      operationId: listMyCheckins
+      summary: List the current participant's daily check-ins
+      responses:
+        '200':
+          description: List of check-ins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DailyCheckin'
+        '401':
+          description: Unauthorized
+    post:
+      tags: [checkins]
+      operationId: submitCheckin
+      summary: Submit a daily check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DailyCheckinInput'
+      responses:
+        '201':
+          description: Check-in submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyCheckin'
+        '400':
+          description: Invalid input or already submitted today
+        '401':
+          description: Unauthorized
+
+  /checkins/today:
+    get:
+      tags: [checkins]
+      operationId: getTodayCheckin
+      summary: Check whether today's check-in has been submitted
+      responses:
+        '200':
+          description: Today's check-in status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TodayCheckinStatus'
+        '401':
+          description: Unauthorized
+
+  /modules:
+    get:
+      tags: [modules]
+      operationId: listModules
+      summary: List available curriculum modules (Weeks 1-4)
+      responses:
+        '200':
+          description: List of modules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Module'
+        '401':
+          description: Unauthorized
+
+  /modules/{weekNumber}:
+    get:
+      tags: [modules]
+      operationId: getModule
+      summary: Get a specific curriculum module by week number
+      parameters:
+        - name: weekNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Module content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Module'
+        '404':
+          description: Module not found
+        '401':
+          description: Unauthorized
+
+  /submissions:
+    get:
+      tags: [submissions]
+      operationId: listMySubmissions
+      summary: List the current participant's weekly submissions
+      responses:
+        '200':
+          description: Submissions list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeeklySubmission'
+        '401':
+          description: Unauthorized
+    post:
+      tags: [submissions]
+      operationId: createSubmission
+      summary: Submit a weekly reflection and integrity commitment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionInput'
+      responses:
+        '201':
+          description: Submission created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySubmission'
+        '400':
+          description: Invalid input or already submitted this week
+        '401':
+          description: Unauthorized
+
+  /submissions/{id}:
+    get:
+      tags: [submissions]
+      operationId: getSubmission
+      summary: Get a specific weekly submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Submission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySubmission'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+
+  /submissions/{id}/feedback:
+    get:
+      tags: [feedback]
+      operationId: getSubmissionFeedback
+      summary: Get AI mentor feedback for a submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Feedback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIFeedback'
+        '404':
+          description: No feedback generated yet
+        '401':
+          description: Unauthorized
+    post:
+      tags: [feedback]
+      operationId: generateSubmissionFeedback
+      summary: Generate AI mentor feedback for a submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Feedback generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIFeedback'
+        '404':
+          description: Submission not found
+        '401':
+          description: Unauthorized
+
+  /clinician/participants:
+    get:
+      tags: [clinician]
+      operationId: listClinicianParticipants
+      summary: List participants assigned to the current clinician
+      responses:
+        '200':
+          description: Participant list with activity summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParticipantSummary'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a clinician
+
+  /clinician/participants/{participantId}:
+    get:
+      tags: [clinician]
+      operationId: getClinicianParticipantDetail
+      summary: Get full participant detail including submissions and check-ins
+      parameters:
+        - name: participantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participant detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipantDetail'
+        '404':
+          description: Not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not authorized
+
+  /clinician/participants/{participantId}/summary:
+    post:
+      tags: [clinician]
+      operationId: generateParticipationSummary
+      summary: Generate a participation summary documenting activity facts only
+      parameters:
+        - name: participantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Participation summary generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParticipationSummary'
+        '404':
+          description: Participant not found
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a clinician
+    get:
+      tags: [clinician]
+      operationId: getParticipationSummaries
+      summary: List previously generated participation summaries for a participant
+      parameters:
+        - name: participantId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParticipationSummary'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a clinician
+
 components:
+  parameters:
+    AuthorizationSessionHeader:
+      name: Authorization
+      in: header
+      required: false
+      description: Opaque session token — `Bearer <sid>`.
+      schema:
+        type: string
+    SessionCookie:
+      name: sid
+      in: cookie
+      required: false
+      description: Browser session cookie.
+      schema:
+        type: string
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +572,339 @@ components:
       required:
         - status
 
+    AuthUser:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+          format: email
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+    AuthUserEnvelope:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: '#/components/schemas/AuthUser'
+            - type: 'null'
+    MobileTokenExchangeRequest:
+      type: object
+      required: [code, code_verifier, redirect_uri, state]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        code_verifier:
+          type: string
+          minLength: 1
+        redirect_uri:
+          type: string
+          minLength: 1
+          format: uri
+        state:
+          type: string
+          minLength: 1
+        nonce:
+          type: string
+          minLength: 1
+    MobileTokenExchangeSuccess:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+    LogoutSuccess:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          const: true
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id, email, firstName, lastName, profileImageUrl, role, createdAt]
+      properties:
+        id:
+          type: string
+        email:
+          type: [string, 'null']
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        profileImageUrl:
+          type: [string, 'null']
+        role:
+          type: [string, 'null']
+        createdAt:
+          type: string
+          format: date-time
+
+    RoleUpdate:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [participant, clinician]
+
+    ParticipantProfile:
+      type: object
+      required: [id, userId, relationshipStatus, onboardingCompleted, acknowledgmentsAccepted, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        clinicianId:
+          type: [string, 'null']
+        relationshipStatus:
+          type: [string, 'null']
+        onboardingCompleted:
+          type: boolean
+        acknowledgmentsAccepted:
+          type: boolean
+        onboardingCompletedAt:
+          type: [string, 'null']
+          format: date-time
+        acknowledgmentsAcceptedAt:
+          type: [string, 'null']
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    OnboardingInput:
+      type: object
+      required: [acknowledgmentsAccepted, relationshipStatus]
+      properties:
+        acknowledgmentsAccepted:
+          type: boolean
+        relationshipStatus:
+          type: string
+
+    RelationshipStatusUpdate:
+      type: object
+      required: [relationshipStatus]
+      properties:
+        relationshipStatus:
+          type: string
+
+    DailyCheckin:
+      type: object
+      required: [id, participantId, checkInDate, reflectionResponse, completedAt]
+      properties:
+        id:
+          type: integer
+        participantId:
+          type: integer
+        checkInDate:
+          type: string
+          format: date
+        reflectionResponse:
+          type: string
+        completedAt:
+          type: string
+          format: date-time
+
+    DailyCheckinInput:
+      type: object
+      required: [reflectionResponse]
+      properties:
+        reflectionResponse:
+          type: string
+          minLength: 1
+
+    TodayCheckinStatus:
+      type: object
+      required: [submitted, checkInDate]
+      properties:
+        submitted:
+          type: boolean
+        checkInDate:
+          type: string
+          format: date
+        checkin:
+          oneOf:
+            - $ref: '#/components/schemas/DailyCheckin'
+            - type: 'null'
+
+    Module:
+      type: object
+      required: [weekNumber, title, focusArea, sections]
+      properties:
+        weekNumber:
+          type: integer
+        title:
+          type: string
+        focusArea:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleSection'
+
+    ModuleSection:
+      type: object
+      required: [heading, content]
+      properties:
+        heading:
+          type: string
+        content:
+          type: string
+
+    WeeklySubmission:
+      type: object
+      required: [id, participantId, weekNumber, reflectionResponse, integrityCommitment, attestationChecked, completedAt]
+      properties:
+        id:
+          type: integer
+        participantId:
+          type: integer
+        weekNumber:
+          type: integer
+        reflectionResponse:
+          type: string
+        integrityCommitment:
+          type: string
+        attestationChecked:
+          type: boolean
+        completedAt:
+          type: string
+          format: date-time
+        feedback:
+          oneOf:
+            - $ref: '#/components/schemas/AIFeedback'
+            - type: 'null'
+
+    SubmissionInput:
+      type: object
+      required: [weekNumber, reflectionResponse, integrityCommitment, attestationChecked]
+      properties:
+        weekNumber:
+          type: integer
+          minimum: 1
+          maximum: 4
+        reflectionResponse:
+          type: string
+          minLength: 1
+        integrityCommitment:
+          type: string
+          minLength: 1
+        attestationChecked:
+          type: boolean
+
+    AIFeedback:
+      type: object
+      required: [id, submissionId, feedbackText, generatedAt]
+      properties:
+        id:
+          type: integer
+        submissionId:
+          type: integer
+        feedbackText:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+
+    ParticipantSummary:
+      type: object
+      required: [id, userId, firstName, lastName, email, relationshipStatus, onboardingCompleted, lastActivityAt, needsAttention, weeklyStatus, totalCheckins]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        firstName:
+          type: [string, 'null']
+        lastName:
+          type: [string, 'null']
+        email:
+          type: [string, 'null']
+        relationshipStatus:
+          type: [string, 'null']
+        onboardingCompleted:
+          type: boolean
+        lastActivityAt:
+          type: [string, 'null']
+          format: date-time
+        needsAttention:
+          type: boolean
+        totalCheckins:
+          type: integer
+        weeklyStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekStatus'
+
+    WeekStatus:
+      type: object
+      required: [weekNumber, submitted]
+      properties:
+        weekNumber:
+          type: integer
+        submitted:
+          type: boolean
+        submittedAt:
+          type: [string, 'null']
+          format: date-time
+
+    ParticipantDetail:
+      type: object
+      required: [participant, checkins, submissions, weeklyStatus, totalCheckins, lastActivityAt, needsAttention]
+      properties:
+        participant:
+          $ref: '#/components/schemas/ParticipantSummary'
+        checkins:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyCheckin'
+        submissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeeklySubmission'
+        weeklyStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekStatus'
+        totalCheckins:
+          type: integer
+        lastActivityAt:
+          type: [string, 'null']
+          format: date-time
+        needsAttention:
+          type: boolean
+
+    ParticipationSummary:
+      type: object
+      required: [id, participantId, generatedByClinicianId, generatedAt, summaryText, disclaimer]
+      properties:
+        id:
+          type: integer
+        participantId:
+          type: integer
+        generatedByClinicianId:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+        summaryText:
+          type: string
+        disclaimer:
+          type: string
