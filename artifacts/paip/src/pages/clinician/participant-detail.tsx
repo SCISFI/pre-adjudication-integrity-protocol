@@ -66,14 +66,14 @@ export default function ParticipantDetail() {
 
   const { data: detail, isLoading } = useGetClinicianParticipantDetail(participantId, {
     query: {
-      enabled: participantId > 0,
+      enabled: participantId !== 0,
       queryKey: getGetClinicianParticipantDetailQueryKey(participantId),
     },
   });
 
   const { data: summaries } = useGetParticipationSummaries(participantId, {
     query: {
-      enabled: participantId > 0,
+      enabled: participantId !== 0,
       queryKey: getGetParticipationSummariesQueryKey(participantId),
     },
   });
