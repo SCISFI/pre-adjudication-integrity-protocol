@@ -1,7 +1,7 @@
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@workspace/replit-auth-web";
 import { useGetMyProfile } from "@workspace/api-client-react";
-import { Shield, LogOut, LayoutDashboard, BookOpen, CheckSquare, FileText, Users } from "lucide-react";
+import { Shield, LogOut, LayoutDashboard, BookOpen, CheckSquare, FileText, Users, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface NavItem {
@@ -24,9 +24,10 @@ const CLINICIAN_NAV: NavItem[] = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
   const { data: profile } = useGetMyProfile();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
-  const nav = profile?.role === "clinician" ? CLINICIAN_NAV : PARTICIPANT_NAV;
+  const isClinicalRole = profile?.role === "clinician" || profile?.role === "clinical_admin";
+  const nav = isClinicalRole ? CLINICIAN_NAV : PARTICIPANT_NAV;
   const displayName = [profile?.firstName, profile?.lastName].filter(Boolean).join(" ") || profile?.email || "Account";
 
   return (
@@ -61,12 +62,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+          <button
+            type="button"
+            onClick={() => setLocation("/role-select")}
+            className="flex items-center gap-2.5 px-3 py-2 rounded text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 w-full text-left"
+            data-testid="button-switch-test-role"
+          >
+            <Repeat className="h-4 w-4 shrink-0" />
+            Switch test role
+          </button>
         </nav>
 
         <div className="px-3 py-4 border-t border-sidebar-border">
           <div className="px-3 pb-2">
             <p className="text-xs text-muted-foreground truncate">{displayName}</p>
-            <p className="text-xs text-muted-foreground capitalize">{profile?.role ?? "—"}</p>
+            <p className="text-xs text-muted-foreground capitalize">{profile?.role?.replace("_", " ") ?? "—"}</p>
           </div>
           <Button
             variant="ghost"
