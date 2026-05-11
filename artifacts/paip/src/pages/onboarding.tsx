@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const ACKNOWLEDGMENTS = [
   "I understand that this program is not therapy, legal counsel, or a forensic evaluation.",
@@ -17,12 +18,20 @@ const ACKNOWLEDGMENTS = [
   "I affirm that I will engage with this material honestly and to the best of my ability.",
 ];
 
+const RELATIONSHIP_OPTIONS = [
+  "Single",
+  "Married/partnered",
+  "Separated/divorcing",
+  "Other",
+];
+
 type Step = "acknowledgments" | "relationship" | "complete";
 
 export default function Onboarding() {
   const [step, setStep] = useState<Step>("acknowledgments");
   const [checked, setChecked] = useState<boolean[]>(new Array(ACKNOWLEDGMENTS.length).fill(false));
   const [relationshipStatus, setRelationshipStatus] = useState("");
+  const [otherRelationshipStatus, setOtherRelationshipStatus] = useState("");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
@@ -36,6 +45,12 @@ export default function Onboarding() {
   });
 
   const allChecked = checked.every(Boolean);
+  const finalRelationshipStatus =
+    relationshipStatus === "Other" ? otherRelationshipStatus.trim() : relationshipStatus;
+
+  const relationshipReady =
+    relationshipStatus.length > 0 &&
+    (relationshipStatus !== "Other" || otherRelationshipStatus.trim().length > 1);
 
   function toggleCheck(i: number) {
     setChecked((prev) => {
@@ -49,7 +64,7 @@ export default function Onboarding() {
     completeOnboarding({
       data: {
         acknowledgmentsAccepted: true,
-        relationshipStatus: relationshipStatus.trim() || "Not specified",
+        relationshipStatus: finalRelationshipStatus || "Not specified",
       },
     });
   }
@@ -76,7 +91,6 @@ export default function Onboarding() {
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-background p-6">
       <div className="w-full max-w-lg space-y-8">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center shrink-0">
             <Shield className="h-4 w-4 text-primary-foreground" />
@@ -112,6 +126,7 @@ export default function Onboarding() {
                 ))}
               </div>
             </div>
+
             <Button
               onClick={() => setStep("relationship")}
               disabled={!allChecked}
@@ -125,40 +140,56 @@ export default function Onboarding() {
 
         {step === "relationship" && (
           <>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-foreground">Current relationship status</p>
                 <p className="text-xs text-muted-foreground">
                   This information is used for program context only. It is not shared beyond your assigned clinician.
                 </p>
               </div>
-              <Input
+
+              <RadioGroup
                 value={relationshipStatus}
-                onChange={(e) => setRelationshipStatus(e.target.value)}
-                placeholder="e.g. Single, Married, Separated"
-                data-testid="input-relationship-status"
-              />
-              <div className="flex gap-2 text-xs text-muted-foreground">
-                <span>Examples:</span>
-                {["Single", "Married/partnered", "Separated/divorcing", "Other"].map((s) => (
-                  <button
-                    key={s}
-                    className="underline underline-offset-2 hover:text-foreground"
-                    onClick={() => setRelationshipStatus(s)}
-                    type="button"
-                  >
-                    {s}
-                  </button>
+                onValueChange={(value) => {
+                  setRelationshipStatus(value);
+                  if (value !== "Other") setOtherRelationshipStatus("");
+                }}
+                className="space-y-3"
+                data-testid="radio-relationship-status"
+              >
+                {RELATIONSHIP_OPTIONS.map((option) => (
+                  <div key={option} className="flex items-center space-x-3">
+                    <RadioGroupItem value={option} id={`relationship-${option}`} />
+                    <Label htmlFor={`relationship-${option}`} className="text-sm text-foreground cursor-pointer">
+                      {option}
+                    </Label>
+                  </div>
                 ))}
-              </div>
+              </RadioGroup>
+
+              {relationshipStatus === "Other" && (
+                <div className="space-y-2">
+                  <Label htmlFor="relationship-other" className="text-sm font-medium text-foreground">
+                    Please describe your relationship status
+                  </Label>
+                  <Input
+                    id="relationship-other"
+                    value={otherRelationshipStatus}
+                    onChange={(e) => setOtherRelationshipStatus(e.target.value)}
+                    placeholder="Enter relationship status"
+                    data-testid="input-relationship-status-other"
+                  />
+                </div>
+              )}
             </div>
+
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setStep("acknowledgments")} className="flex-1" data-testid="button-back">
                 Back
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={isPending}
+                disabled={isPending || !relationshipReady}
                 className="flex-1"
                 data-testid="button-submit-onboarding"
               >

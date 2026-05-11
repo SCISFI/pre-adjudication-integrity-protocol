@@ -2,7 +2,59 @@ import { useRoute, useLocation } from "wouter";
 import { useGetModule, useListMySubmissions, getGetModuleQueryKey, getListMySubmissionsQueryKey } from "@workspace/api-client-react";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, LockKeyhole } from "lucide-react";
+
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+type Submission = {
+  weekNumber: number;
+  completedAt: string | Date;
+};
+
+function getUnlockStatus(weekNumber: number, submissions: Submission[]) {
+  const currentWeekSubmitted = submissions.some((s) => s.weekNumber === weekNumber);
+
+  if (currentWeekSubmitted) {
+    return { unlocked: true, reason: "" };
+  }
+
+  if (weekNumber === 1) {
+    return { unlocked: true, reason: "" };
+  }
+
+  const previousSubmission = submissions.find((s) => s.weekNumber === weekNumber - 1);
+
+  if (!previousSubmission) {
+    return {
+      unlocked: false,
+      reason: `Complete Week ${weekNumber - 1} before this module unlocks.`,
+    };
+  }
+
+  const previousCompletedAt = new Date(previousSubmission.completedAt);
+  const unlockDate = new Date(previousCompletedAt.getTime() + SEVEN_DAYS_MS);
+
+  if (Date.now() < unlockDate.getTime()) {
+    return {
+      unlocked: false,
+      reason: `Next module unlocks after your 7-day reflection period is complete (${unlockDate.toLocaleDateString()}).`,
+    };
+  }
+
+  return { unlocked: true, reason: "" };
+}
+
+function SectionContent({ content }: { content: string }) {
+  return (
+    <div className="space-y-3">
+      {content.split(/\n\s*\n/).map((paragraph, index) => (
+        <p key={index} className="text-sm text-foreground leading-relaxed">
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
 
 export default function ModuleDetail() {
   const [, params] = useRoute("/modules/:weekNumber");
@@ -12,8 +64,11 @@ export default function ModuleDetail() {
   const { data: mod, isLoading } = useGetModule(weekNumber, {
     query: { enabled: weekNumber > 0, queryKey: getGetModuleQueryKey(weekNumber) },
   });
+
   const { data: submissions } = useListMySubmissions({ query: { queryKey: getListMySubmissionsQueryKey() } });
-  const alreadySubmitted = (submissions ?? []).some((s: { weekNumber: number }) => s.weekNumber === weekNumber);
+  const submissionList = (submissions ?? []) as Submission[];
+  const alreadySubmitted = submissionList.some((s) => s.weekNumber === weekNumber);
+  const unlockStatus = getUnlockStatus(weekNumber, submissionList);
 
   if (isLoading) {
     return (
@@ -43,6 +98,29 @@ export default function ModuleDetail() {
     sections: { heading: string; content: string }[];
   };
 
+  if (!unlockStatus.unlocked) {
+    return (
+      <Layout>
+        <div className="space-y-5 max-w-xl">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/modules")} className="gap-1.5 -ml-2">
+            <ArrowLeft className="h-4 w-4" /> All modules
+          </Button>
+
+          <div className="rounded border border-border bg-card p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <LockKeyhole className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-semibold text-foreground">Week {weekNumber} is locked</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">{unlockStatus.reason}</p>
+            <p className="text-xs text-muted-foreground">
+              This is not a punishment. The 7-day reflection period exists to slow the work down and keep the weekly commitment meaningful.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="space-y-8 max-w-2xl">
@@ -53,6 +131,9 @@ export default function ModuleDetail() {
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Week {typedMod.weekNumber}</p>
           <h2 className="text-xl font-semibold text-foreground">{typedMod.title}</h2>
           <p className="text-sm text-muted-foreground">{typedMod.focusArea}</p>
+          <p className="text-xs text-muted-foreground pt-2">
+            Plan for about 30 minutes of focused weekly work, not counting daily check-ins.
+          </p>
         </div>
 
         {alreadySubmitted && (
@@ -66,7 +147,7 @@ export default function ModuleDetail() {
           {typedMod.sections.map((section, i) => (
             <div key={i} className="space-y-2">
               <h3 className="text-sm font-semibold text-foreground">{section.heading}</h3>
-              <p className="text-sm text-foreground leading-relaxed">{section.content}</p>
+              <SectionContent content={section.content} />
             </div>
           ))}
         </div>
