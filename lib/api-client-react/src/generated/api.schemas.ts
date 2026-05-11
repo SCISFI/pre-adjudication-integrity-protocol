@@ -72,6 +72,7 @@ export type RoleUpdateRole =
 export const RoleUpdateRole = {
   participant: "participant",
   clinician: "clinician",
+  clinical_admin: "clinical_admin",
 } as const;
 
 export interface RoleUpdate {

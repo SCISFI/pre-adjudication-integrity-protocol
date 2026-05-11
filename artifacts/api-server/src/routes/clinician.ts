@@ -14,13 +14,93 @@ import {
   GenerateParticipationSummaryParams,
   GetParticipationSummariesParams,
 } from "@workspace/api-zod";
-import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
 const NEEDS_ATTENTION_INACTIVITY_DAYS = 7;
 const SUMMARY_DISCLAIMER =
-  "DISCLAIMER: This document is an automated summary of recorded program participation activity. It documents dates of check-in submissions, weekly module completions, and program engagement only. It contains no clinical assessment, risk evaluation, therapeutic interpretation, legal opinion, forensic analysis, or outcome prediction. It must not be interpreted as such by any party. This summary was generated for program monitoring purposes only and does not represent a professional evaluation of any kind.";
+  "DISCLAIMER: This summary documents participation only. It is not a forensic evaluation, psychosexual evaluation, risk assessment, legal opinion, clinical treatment summary, treatment discharge summary, or sentencing recommendation. It does not determine guilt or innocence, verify truthfulness, assess safety, establish rehabilitation, or recommend any legal outcome.";
+
+function daysAgo(days: number): Date {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date;
+}
+
+const DEMO_PARTICIPANTS = [
+  {
+    id: -1,
+    userId: "demo-active",
+    firstName: "James",
+    lastName: "Calloway",
+    email: "james.calloway@example.com",
+    relationshipStatus: "Married/partnered",
+    onboardingCompleted: true,
+    lastActivityAt: daysAgo(1),
+    needsAttention: false,
+    totalCheckins: 5,
+    weeklyStatus: [
+      { weekNumber: 1, submitted: true, submittedAt: daysAgo(6) },
+      { weekNumber: 2, submitted: false, submittedAt: null },
+      { weekNumber: 3, submitted: false, submittedAt: null },
+      { weekNumber: 4, submitted: false, submittedAt: null },
+    ],
+  },
+  {
+    id: -2,
+    userId: "demo-needs-attention",
+    firstName: "Marcus",
+    lastName: "Ellison",
+    email: "marcus.ellison@example.com",
+    relationshipStatus: "Separated/divorcing",
+    onboardingCompleted: true,
+    lastActivityAt: daysAgo(9),
+    needsAttention: true,
+    totalCheckins: 2,
+    weeklyStatus: [
+      { weekNumber: 1, submitted: true, submittedAt: daysAgo(10) },
+      { weekNumber: 2, submitted: false, submittedAt: null },
+      { weekNumber: 3, submitted: false, submittedAt: null },
+      { weekNumber: 4, submitted: false, submittedAt: null },
+    ],
+  },
+  {
+    id: -3,
+    userId: "demo-completed-week-one",
+    firstName: "Thomas",
+    lastName: "Brennan",
+    email: "thomas.brennan@example.com",
+    relationshipStatus: "Single",
+    onboardingCompleted: true,
+    lastActivityAt: daysAgo(0),
+    needsAttention: false,
+    totalCheckins: 1,
+    weeklyStatus: [
+      { weekNumber: 1, submitted: true, submittedAt: daysAgo(0) },
+      { weekNumber: 2, submitted: false, submittedAt: null },
+      { weekNumber: 3, submitted: false, submittedAt: null },
+      { weekNumber: 4, submitted: false, submittedAt: null },
+    ],
+  },
+  {
+    id: -4,
+    userId: "demo-not-started",
+    firstName: "Robert",
+    lastName: "Demo",
+    email: "robert.demo@example.com",
+    relationshipStatus: null,
+    onboardingCompleted: false,
+    lastActivityAt: null,
+    needsAttention: true,
+    totalCheckins: 0,
+    weeklyStatus: [
+      { weekNumber: 1, submitted: false, submittedAt: null },
+      { weekNumber: 2, submitted: false, submittedAt: null },
+      { weekNumber: 3, submitted: false, submittedAt: null },
+      { weekNumber: 4, submitted: false, submittedAt: null },
+    ],
+  },
+];
 
 function calculateNeedsAttention(lastActivityAt: Date | null): boolean {
   if (!lastActivityAt) return true;
@@ -37,6 +117,10 @@ function getWeeklyStatus(submissions: { weekNumber: number; completedAt: Date }[
       submittedAt: sub?.completedAt ?? null,
     };
   });
+}
+
+function isClinicalRole(role: string | null | undefined) {
+  return role === "clinician" || role === "clinical_admin";
 }
 
 async function getLastActivity(participantId: number): Promise<Date | null> {
@@ -62,17 +146,49 @@ async function getLastActivity(participantId: number): Promise<Date | null> {
   return new Date(Math.max(...dates.map((d) => d.getTime())));
 }
 
-async function requireClinician(req: { isAuthenticated: () => boolean; user?: { id: string } }, res: { status: (n: number) => { json: (o: unknown) => void } }): Promise<boolean> {
-  if (!req.isAuthenticated()) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, req.user!.id));
-  if (!user || user.role !== "clinician") {
-    res.status(403).json({ error: "Not a clinician" });
-    return false;
-  }
-  return true;
+function getDemoParticipantDetail(participantId: number) {
+  const demo = DEMO_PARTICIPANTS.find((p) => p.id === participantId) ?? DEMO_PARTICIPANTS[0];
+
+  return {
+    participant: demo,
+    checkins:
+      demo.totalCheckins > 0
+        ? [
+            {
+              id: -101,
+              participantId: demo.id,
+              checkInDate: daysAgo(1),
+              reflectionResponse:
+                "Fictional demo check-in: tired, stressed, and working on not isolating. No offense details included.",
+              completedAt: daysAgo(1),
+            },
+          ]
+        : [],
+    submissions: demo.weeklyStatus
+      .filter((w) => w.submitted)
+      .map((w) => ({
+        id: -201 - w.weekNumber,
+        participantId: demo.id,
+        weekNumber: w.weekNumber,
+        reflectionResponse:
+          "Fictional demo weekly reflection: I am facing secrecy, shame, and the need for structured support. I need to bring the deeper clinical material to therapy and avoid using the app for legal or offense details.",
+        integrityCommitment:
+          "I will complete my daily check-ins honestly and contact an appropriate support person before isolating.",
+        attestationChecked: true,
+        completedAt: w.submittedAt ?? daysAgo(1),
+        feedback: {
+          id: -301 - w.weekNumber,
+          submissionId: -201 - w.weekNumber,
+          feedbackText:
+            "James, your reflection names shame and isolation without turning them into excuses. Keep the next step concrete: honor your boundary, avoid isolation, and bring the deeper clinical material to your licensed therapist or supervised clinical provider.",
+          generatedAt: w.submittedAt ?? daysAgo(1),
+        },
+      })),
+    weeklyStatus: demo.weeklyStatus,
+    totalCheckins: demo.totalCheckins,
+    lastActivityAt: demo.lastActivityAt,
+    needsAttention: demo.needsAttention,
+  };
 }
 
 router.get("/clinician/participants", async (req, res): Promise<void> => {
@@ -82,15 +198,22 @@ router.get("/clinician/participants", async (req, res): Promise<void> => {
   }
 
   const [clinician] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id));
-  if (!clinician || clinician.role !== "clinician") {
+  if (!clinician || !isClinicalRole(clinician.role)) {
     res.status(403).json({ error: "Not a clinician" });
     return;
   }
 
-  const participants = await db
-    .select()
-    .from(participantsTable)
-    .where(eq(participantsTable.clinicianId, req.user.id));
+  const participantQuery =
+    clinician.role === "clinical_admin"
+      ? db.select().from(participantsTable)
+      : db.select().from(participantsTable).where(eq(participantsTable.clinicianId, req.user.id));
+
+  const participants = await participantQuery;
+
+  if (participants.length === 0) {
+    res.json(DEMO_PARTICIPANTS);
+    return;
+  }
 
   const results = await Promise.all(
     participants.map(async (p) => {
@@ -132,7 +255,7 @@ router.get("/clinician/participants/:participantId", async (req, res): Promise<v
   }
 
   const [clinician] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id));
-  if (!clinician || clinician.role !== "clinician") {
+  if (!clinician || !isClinicalRole(clinician.role)) {
     res.status(403).json({ error: "Not a clinician" });
     return;
   }
@@ -143,15 +266,20 @@ router.get("/clinician/participants/:participantId", async (req, res): Promise<v
     return;
   }
 
-  const [participant] = await db
-    .select()
-    .from(participantsTable)
-    .where(
-      and(
-        eq(participantsTable.id, params.data.participantId),
-        eq(participantsTable.clinicianId, req.user.id),
-      ),
-    );
+  if (params.data.participantId < 0) {
+    res.json(getDemoParticipantDetail(params.data.participantId));
+    return;
+  }
+
+  const whereClause =
+    clinician.role === "clinical_admin"
+      ? eq(participantsTable.id, params.data.participantId)
+      : and(
+          eq(participantsTable.id, params.data.participantId),
+          eq(participantsTable.clinicianId, req.user.id),
+        );
+
+  const [participant] = await db.select().from(participantsTable).where(whereClause);
 
   if (!participant) {
     res.status(404).json({ error: "Participant not found or not assigned to you" });
@@ -214,7 +342,7 @@ router.post("/clinician/participants/:participantId/summary", async (req, res): 
   }
 
   const [clinician] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id));
-  if (!clinician || clinician.role !== "clinician") {
+  if (!clinician || !isClinicalRole(clinician.role)) {
     res.status(403).json({ error: "Not a clinician" });
     return;
   }
@@ -225,15 +353,28 @@ router.post("/clinician/participants/:participantId/summary", async (req, res): 
     return;
   }
 
-  const [participant] = await db
-    .select()
-    .from(participantsTable)
-    .where(
-      and(
-        eq(participantsTable.id, params.data.participantId),
-        eq(participantsTable.clinicianId, req.user.id),
-      ),
-    );
+  if (params.data.participantId < 0) {
+    res.json({
+      id: -900,
+      participantId: params.data.participantId,
+      generatedByClinicianId: req.user.id,
+      generatedAt: new Date(),
+      summaryText:
+        "DEMO PARTICIPATION SUMMARY — ACTIVITY FACTS ONLY\n\nThis fictional demo participant has sample activity for testing the summary workflow. No real client information, offense details, legal facts, or clinical opinions are included.",
+      disclaimer: SUMMARY_DISCLAIMER,
+    });
+    return;
+  }
+
+  const whereClause =
+    clinician.role === "clinical_admin"
+      ? eq(participantsTable.id, params.data.participantId)
+      : and(
+          eq(participantsTable.id, params.data.participantId),
+          eq(participantsTable.clinicianId, req.user.id),
+        );
+
+  const [participant] = await db.select().from(participantsTable).where(whereClause);
 
   if (!participant) {
     res.status(404).json({ error: "Participant not found or not assigned to you" });
@@ -258,15 +399,6 @@ router.post("/clinician/participants/:participantId/summary", async (req, res): 
   const completedWeeks = weeklyStatus.filter((w) => w.submitted).map((w) => w.weekNumber);
   const lastActivityAt = await getLastActivity(participant.id);
 
-  const checkinDates = checkins.map((c) => c.checkInDate).join(", ");
-  const submissionDetails = weeklyStatus
-    .map((w) =>
-      w.submitted
-        ? `Week ${w.weekNumber}: submitted on ${w.submittedAt?.toISOString().split("T")[0]}`
-        : `Week ${w.weekNumber}: not submitted`,
-    )
-    .join("; ");
-
   const summaryText = [
     `PARTICIPATION SUMMARY — ACTIVITY FACTS ONLY`,
     ``,
@@ -275,15 +407,13 @@ router.post("/clinician/participants/:participantId/summary", async (req, res): 
     `Weeks available in current phase: 1–4`,
     ``,
     `ONBOARDING`,
-    `Onboarding completed: ${participant.onboardingCompleted ? `Yes, on ${participant.onboardingCompletedAt?.toISOString().split("T")[0]}` : "No"}`,
-    `Acknowledgments accepted: ${participant.acknowledgmentsAccepted ? `Yes, on ${participant.acknowledgmentsAcceptedAt?.toISOString().split("T")[0]}` : "No"}`,
+    `Onboarding completed: ${participant.onboardingCompleted ? "Yes" : "No"}`,
+    `Acknowledgments accepted: ${participant.acknowledgmentsAccepted ? "Yes" : "No"}`,
     ``,
     `DAILY CHECK-IN ACTIVITY`,
     `Total daily check-ins submitted: ${totalCheckins}`,
-    checkinDates ? `Check-in dates: ${checkinDates}` : `Check-in dates: None recorded`,
     ``,
     `WEEKLY MODULE SUBMISSIONS`,
-    submissionDetails,
     `Weeks completed: ${completedWeeks.length > 0 ? completedWeeks.join(", ") : "None"}`,
     ``,
     `LAST RECORDED ACTIVITY`,
@@ -312,7 +442,7 @@ router.get("/clinician/participants/:participantId/summary", async (req, res): P
   }
 
   const [clinician] = await db.select().from(usersTable).where(eq(usersTable.id, req.user.id));
-  if (!clinician || clinician.role !== "clinician") {
+  if (!clinician || !isClinicalRole(clinician.role)) {
     res.status(403).json({ error: "Not a clinician" });
     return;
   }
@@ -320,6 +450,11 @@ router.get("/clinician/participants/:participantId/summary", async (req, res): P
   const params = GetParticipationSummariesParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  if (params.data.participantId < 0) {
+    res.json([]);
     return;
   }
 
