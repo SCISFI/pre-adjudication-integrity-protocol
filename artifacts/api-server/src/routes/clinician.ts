@@ -274,13 +274,15 @@ router.get("/clinician/participants/:participantId", async (req, res): Promise<v
     return;
   }
 
-  const whereClause =
-    clinician.role === "clinical_admin"
-      ? eq(participantsTable.id, params.data.participantId)
-      : and(
-          eq(participantsTable.id, params.data.participantId),
-          eq(participantsTable.clinicianId, req.user.id),
-        );
+  if (clinician.role === "clinical_admin") {
+    res.status(404).json({ error: "Clinical Admin Test View uses fictional demo participants only" });
+    return;
+  }
+
+  const whereClause = and(
+    eq(participantsTable.id, params.data.participantId),
+    eq(participantsTable.clinicianId, req.user.id),
+  );
 
   const [participant] = await db.select().from(participantsTable).where(whereClause);
 
@@ -369,13 +371,15 @@ router.post("/clinician/participants/:participantId/summary", async (req, res): 
     return;
   }
 
-  const whereClause =
-    clinician.role === "clinical_admin"
-      ? eq(participantsTable.id, params.data.participantId)
-      : and(
-          eq(participantsTable.id, params.data.participantId),
-          eq(participantsTable.clinicianId, req.user.id),
-        );
+  if (clinician.role === "clinical_admin") {
+    res.status(404).json({ error: "Clinical Admin Test View uses fictional demo participants only" });
+    return;
+  }
+
+  const whereClause = and(
+    eq(participantsTable.id, params.data.participantId),
+    eq(participantsTable.clinicianId, req.user.id),
+  );
 
   const [participant] = await db.select().from(participantsTable).where(whereClause);
 
@@ -458,6 +462,11 @@ router.get("/clinician/participants/:participantId/summary", async (req, res): P
 
   if (params.data.participantId < 0) {
     res.json([]);
+    return;
+  }
+
+  if (clinician.role === "clinical_admin") {
+    res.status(404).json({ error: "Clinical Admin Test View uses fictional demo participants only" });
     return;
   }
 

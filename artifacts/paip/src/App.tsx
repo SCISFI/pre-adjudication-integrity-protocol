@@ -57,7 +57,7 @@ function RoleRouter() {
         setLocation("/role-select");
       } else if (profile.role === "participant") {
         setLocation("/dashboard");
-      } else if (profile.role === "clinician") {
+      } else if (profile.role === "clinician" || profile.role === "clinical_admin") {
         setLocation("/clinician");
       }
     }
