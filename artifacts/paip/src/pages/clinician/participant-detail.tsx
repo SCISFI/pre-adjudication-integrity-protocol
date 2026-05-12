@@ -58,7 +58,9 @@ interface Summary {
 }
 
 export default function ParticipantDetail() {
-  const [, params] = useRoute("/clinician/:participantId");
+  const [, detailParams] = useRoute("/clinician/participants/:participantId");
+  const [, summaryParams] = useRoute("/clinician/participants/:participantId/summary");
+  const params = detailParams ?? summaryParams;
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const participantId = params ? parseInt(params.participantId, 10) : 0;
@@ -99,7 +101,7 @@ export default function ParticipantDetail() {
     return (
       <Layout>
         <div className="space-y-4">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/clinician")} className="gap-1.5">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/clinician/dashboard")} className="gap-1.5">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
           <p className="text-sm text-muted-foreground">Participant not found.</p>
@@ -122,7 +124,7 @@ export default function ParticipantDetail() {
       <div className="space-y-8">
         {/* Back + Header */}
         <div className="space-y-2">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/clinician")} className="gap-1.5 -ml-2">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/clinician/dashboard")} className="gap-1.5 -ml-2">
             <ArrowLeft className="h-4 w-4" /> All participants
           </Button>
           <div className="flex items-start justify-between">

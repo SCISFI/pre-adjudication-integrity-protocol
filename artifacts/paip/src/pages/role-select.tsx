@@ -16,7 +16,7 @@ export default function RoleSelect() {
         if (data.role === "participant") {
           setLocation("/onboarding");
         } else if (data.role === "clinician" || data.role === "clinical_admin") {
-          setLocation("/clinician");
+          setLocation("/clinician/dashboard");
         }
       },
     },
