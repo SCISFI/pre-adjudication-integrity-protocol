@@ -77,9 +77,15 @@ export default function RoleSelect() {
             disabled={isPending}
             className="w-full text-left p-5 rounded border border-border bg-card hover:bg-muted/50 transition-colors disabled:opacity-50 group"
           >
+<<<<<<< HEAD
             <p className="font-medium text-foreground group-hover:text-primary">I am a Clinical Admin Test View</p>
             <p className="text-sm text-muted-foreground mt-1">
               Use the clinician testing dashboard with fictional participants. Production admin access will be separated later.
+=======
+            <p className="font-medium text-foreground group-hover:text-primary">Clinical Admin Test View</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Development/testing only. Production admin access will be separated later.
+>>>>>>> 8ca24f9ba4ea507d7bbd570838161a07a1c3a4a6
             </p>
           </button>
         </div>

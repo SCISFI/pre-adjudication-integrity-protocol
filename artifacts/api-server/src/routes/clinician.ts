@@ -203,12 +203,15 @@ router.get("/clinician/participants", async (req, res): Promise<void> => {
     return;
   }
 
-  const participantQuery =
-    clinician.role === "clinical_admin"
-      ? db.select().from(participantsTable)
-      : db.select().from(participantsTable).where(eq(participantsTable.clinicianId, req.user.id));
+  if (clinician.role === "clinical_admin") {
+    res.json(DEMO_PARTICIPANTS);
+    return;
+  }
 
-  const participants = await participantQuery;
+  const participants = await db
+    .select()
+    .from(participantsTable)
+    .where(eq(participantsTable.clinicianId, req.user.id));
 
   if (participants.length === 0) {
     res.json(DEMO_PARTICIPANTS);

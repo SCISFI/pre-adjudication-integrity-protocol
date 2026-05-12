@@ -2,6 +2,7 @@ import { useListMySubmissions, getListMySubmissionsQueryKey } from "@workspace/a
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const WEEK_TITLES = [
   "Orientation and Foundations",
@@ -34,7 +35,10 @@ export default function Submissions() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1.5 -ml-2">
+            <ArrowLeft className="h-4 w-4" /> Return to Main Menu
+          </Button>
           <h2 className="text-xl font-semibold text-foreground">My Submissions</h2>
           <p className="text-sm text-muted-foreground mt-1">Weekly reflections and integrity commitments</p>
         </div>
@@ -63,8 +67,8 @@ export default function Submissions() {
 
               <div className="px-5 py-4 space-y-4">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Reflection</p>
-                  <p className="text-sm text-foreground leading-relaxed">{sub.reflectionResponse}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Structured responses</p>
+                  <pre className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">{sub.reflectionResponse}</pre>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Integrity commitment</p>
