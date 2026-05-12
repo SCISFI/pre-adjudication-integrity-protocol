@@ -1,24 +1,31 @@
-import { useListMySubmissions, getListMySubmissionsQueryKey } from "@workspace/api-client-react";
+import {
+  useListMySubmissions,
+  getListMySubmissionsQueryKey,
+} from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 const WEEK_TITLES = [
-  "The Day Everything Changed",
-  "Staying Alive and Grounded",
-  "Legal Trouble Is Not Recovery",
-  "Who Belongs Where",
+  "Orientation Intensive: The First 7 Days",
+  "Thinking Patterns and Daily Honesty",
+  "Before You Act: Choice Points and Self-Control",
+  "Boundaries, Sexual Health, and Support Team",
 ];
 
 export default function Submissions() {
   const [, setLocation] = useLocation();
-  const { data: submissions, isLoading } = useListMySubmissions({ query: { queryKey: getListMySubmissionsQueryKey() } });
+  const { data: submissions, isLoading } = useListMySubmissions({
+    query: { queryKey: getListMySubmissionsQueryKey() },
+  });
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>
+        <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
+          Loading…
+        </div>
       </Layout>
     );
   }
@@ -35,18 +42,24 @@ export default function Submissions() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="space-y-2">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1.5 -ml-2">
-            <ArrowLeft className="h-4 w-4" /> Return to Main Menu
-          </Button>
-          <h2 className="text-xl font-semibold text-foreground">My Submissions</h2>
-          <p className="text-sm text-muted-foreground mt-1">Weekly reflections and integrity commitments</p>
+        <div>
+          <h2 className="text-xl font-semibold text-foreground">
+            My Submissions
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Weekly reflections and integrity commitments
+          </p>
         </div>
 
         {list.length === 0 && (
           <div className="rounded border border-border p-8 text-center space-y-3 bg-card">
             <p className="text-sm text-muted-foreground">No submissions yet.</p>
-            <Button size="sm" variant="outline" onClick={() => setLocation("/modules")} data-testid="button-go-modules">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setLocation("/modules")}
+              data-testid="button-go-modules"
+            >
               View weekly modules
             </Button>
           </div>
@@ -54,33 +67,58 @@ export default function Submissions() {
 
         <div className="space-y-6">
           {list.map((sub) => (
-            <div key={sub.id} className="rounded border border-border bg-card overflow-hidden" data-testid={`submission-week-${sub.weekNumber}`}>
+            <div
+              key={sub.id}
+              className="rounded border border-border bg-card overflow-hidden"
+              data-testid={`submission-week-${sub.weekNumber}`}
+            >
               <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Week {sub.weekNumber}</p>
-                  <p className="text-sm font-medium text-foreground mt-0.5">{WEEK_TITLES[sub.weekNumber - 1]}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Week {sub.weekNumber}
+                  </p>
+                  <p className="text-sm font-medium text-foreground mt-0.5">
+                    {WEEK_TITLES[sub.weekNumber - 1]}
+                  </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(sub.completedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                  {new Date(sub.completedAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
 
               <div className="px-5 py-4 space-y-4">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Structured responses</p>
-                  <pre className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">{sub.reflectionResponse}</pre>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                    Structured responses
+                  </p>
+                  <pre className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">
+                    {sub.reflectionResponse}
+                  </pre>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Integrity commitment</p>
-                  <p className="text-sm text-foreground leading-relaxed">{sub.integrityCommitment}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
+                    Integrity commitment
+                  </p>
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {sub.integrityCommitment}
+                  </p>
                 </div>
 
                 {sub.feedback && (
                   <div className="pt-3 border-t border-border space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Mentor feedback</p>
-                    <p className="text-sm text-foreground leading-relaxed">{sub.feedback.feedbackText}</p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                      Mentor feedback
+                    </p>
+                    <p className="text-sm text-foreground leading-relaxed">
+                      {sub.feedback.feedbackText}
+                    </p>
                     <p className="text-xs text-muted-foreground italic">
-                      This feedback is for reflective purposes only and is not for court use.
+                      This feedback is for reflective purposes only and is not
+                      for court use.
                     </p>
                   </div>
                 )}

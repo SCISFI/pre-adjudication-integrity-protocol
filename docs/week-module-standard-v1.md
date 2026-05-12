@@ -4,9 +4,15 @@
 
 Weekly modules in The Pre-Adjudication Integrity Protocol are structured recovery-accountability assignments. They are not brief reading pages, therapy sessions, legal exercises, forensic evaluations, risk assessments, relapse predictions, or court-performance documents.
 
-## Time Standard
+## Time and Depth Standard
 
-Each weekly module should be designed for approximately 30 minutes of focused work, not counting daily check-ins.
+Each weekly module should require at least 30 minutes of focused work, not counting daily check-ins. A module should not feel like a short reading page followed by one reflection. It should include enough teaching, self-observation, written response, role clarification, and weekly action planning to support serious first-phase accountability work.
+
+## Pacing Standard
+
+Phase 1 should move faster than a slow orientation track. The first module now consolidates the initial crisis-orientation work that previously sat across Weeks 1-4: seriousness of the moment, stabilization, legal/recovery separation, role clarity, support boundaries, relationship responsibility, and a first action plan.
+
+After Week 1, each module should introduce a new practice domain rather than repeating orientation content. Weeks 2-4 should advance into thought-level honesty, choice-point/self-control practice, and healthy boundaries/support-team structure.
 
 ## Required Module Pattern
 
@@ -34,12 +40,11 @@ Self-inventory items may help participants notice areas such as isolation, sleep
 
 Clinicians may review participant responses as self-attested written content. The app should display each prompt and answer clearly. The app must not summarize, interpret, score, diagnose, predict risk, recommend legal action, or state that a participant is safe or rehabilitated.
 
+## Phase 1 Accelerated Module Themes
 
-## Phase 1 Initial Module Themes
+The initial Weeks 1-4 module sequence should follow this accelerated standard:
 
-The initial Weeks 1-4 module sequence should follow this standard:
-
-1. Week 1: The Day Everything Changed
-2. Week 2: Staying Alive and Grounded
-3. Week 3: Legal Trouble Is Not Recovery
-4. Week 4: Who Belongs Where
+1. Week 1: Orientation Intensive: The First 7 Days
+2. Week 2: Thinking Patterns and Daily Honesty
+3. Week 3: Before You Act: Choice Points and Self-Control
+4. Week 4: Boundaries, Sexual Health, and Support Team
