@@ -73,13 +73,13 @@ export default function RoleSelect() {
 
           <button
             data-testid="role-clinical-admin"
-            onClick={() => updateRole({ data: { role: "clinical_admin" } })}
+            onClick={() => updateRole({ data: { role: "clinician" } })}
             disabled={isPending}
             className="w-full text-left p-5 rounded border border-border bg-card hover:bg-muted/50 transition-colors disabled:opacity-50 group"
           >
-            <p className="font-medium text-foreground group-hover:text-primary">I am a Clinical Admin</p>
+            <p className="font-medium text-foreground group-hover:text-primary">Clinical Admin Test View</p>
             <p className="text-sm text-muted-foreground mt-1">
-              I need development/testing access to all fictional seed participants and clinician tools.
+              Development/testing only. Production admin access will be separated later.
             </p>
           </button>
         </div>

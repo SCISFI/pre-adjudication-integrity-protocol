@@ -29,16 +29,22 @@ type Prompt = {
   minLength: number;
 };
 
+type SelfInventoryItem = {
+  id: string;
+  label: string;
+};
+
 const WEEKLY_PROMPTS: Record<number, Prompt[]> = {
   1: [
-    { id: "truth", label: "Truth I am facing", question: "What truth am I facing this week?", minLength: 20 },
-    { id: "avoidance", label: "Avoidance pattern", question: "Where am I tempted to hide, minimize, blame, or manage my image?", minLength: 20 },
-    { id: "emotion", label: "Dangerous emotion", question: "What emotion is most dangerous for me right now?", minLength: 10 },
-    { id: "boundary", label: "Boundary", question: "What boundary do I need to honor for the next seven days?", minLength: 15 },
-    { id: "support", label: "Support contact", question: "Who needs to know how I am really doing?", minLength: 10 },
-    { id: "therapy", label: "Therapy work", question: "What do I need to discuss with my licensed therapist or supervised clinical provider?", minLength: 15 },
-    { id: "family", label: "Relationship or family impact", question: "What responsibility do I need to practice toward my spouse, partner, family, household, or future relationships without demanding reassurance?", minLength: 20 },
-    { id: "next-action", label: "Next right action", question: "What is one concrete action I will take before this week ends?", minLength: 15 },
+    { id: "truth", label: "Truth I am facing", question: "What truth am I facing this week?", minLength: 30 },
+    { id: "avoidance", label: "Hide, minimize, blame, or manage", question: "What am I most tempted to hide, minimize, blame, or manage?", minLength: 30 },
+    { id: "emotion", label: "Most dangerous emotion", question: "What emotion is most dangerous for me right now?", minLength: 20 },
+    { id: "boundary", label: "Seven-day boundary", question: "What boundary do I need to honor for the next 7 days?", minLength: 25 },
+    { id: "support", label: "Who needs to know", question: "Who needs to know how I am really doing?", minLength: 20 },
+    { id: "attorney", label: "Belongs with my attorney", question: "What belongs with my attorney, not this app?", minLength: 20 },
+    { id: "clinical-provider", label: "Belongs with my clinical provider", question: "What belongs with my licensed therapist or supervised clinical provider?", minLength: 20 },
+    { id: "relationship-responsibility", label: "Relationship and family responsibility", question: "What responsibility do I need to practice toward my spouse, partner, family, household, or future relationships without demanding reassurance?", minLength: 30 },
+    { id: "next-action", label: "Concrete next-right action", question: "What is one concrete next-right action I will take before this week ends?", minLength: 25 },
   ],
   2: [
     { id: "shame", label: "Shame and despair", question: "What is shame, despair, or panic telling me this week?", minLength: 20 },
@@ -71,6 +77,15 @@ const WEEKLY_PROMPTS: Record<number, Prompt[]> = {
     { id: "commitment-prep", label: "Right truth, right place", question: "What boundary will I practice this week about putting the right truth in the right place?", minLength: 15 },
   ],
 };
+
+const WEEK_ONE_SELF_INVENTORY: SelfInventoryItem[] = [
+  { id: "isolation", label: "Isolation" },
+  { id: "sleep-disruption", label: "Sleep disruption" },
+  { id: "shame-intensity", label: "Shame intensity" },
+  { id: "panic", label: "Panic" },
+  { id: "image-management", label: "Temptation to manage image" },
+  { id: "avoid-support", label: "Temptation to avoid therapy/support" },
+];
 
 function getUnlockStatus(weekNumber: number, submissions: Submission[]) {
   const currentWeekSubmitted = submissions.some((s) => s.weekNumber === weekNumber);
@@ -121,6 +136,7 @@ export default function ModuleSubmit() {
   const prompts = WEEKLY_PROMPTS[weekNumber] ?? WEEKLY_PROMPTS[1];
 
   const [responses, setResponses] = useState<Record<string, string>>({});
+  const [selfInventory, setSelfInventory] = useState<Record<string, boolean>>({});
   const [commitment, setCommitment] = useState("");
   const [attested, setAttested] = useState(false);
   const [submittedData, setSubmittedData] = useState<{ feedbackText?: string | null } | null>(null);
@@ -138,13 +154,25 @@ export default function ModuleSubmit() {
     setResponses((prev) => ({ ...prev, [id]: value }));
   }
 
+  function setInventoryItem(id: string, value: boolean) {
+    setSelfInventory((prev) => ({ ...prev, [id]: value }));
+  }
+
   function buildReflectionResponse() {
-    return prompts
+    const writtenResponses = prompts
       .map((prompt) => {
         const answer = (responses[prompt.id] ?? "").trim();
         return `${prompt.label}\nQuestion: ${prompt.question}\nResponse: ${answer}`;
       })
       .join("\n\n---\n\n");
+
+    if (weekNumber !== 1) return writtenResponses;
+
+    const inventoryResponses = WEEK_ONE_SELF_INVENTORY
+      .map((item) => `${item.label}: ${selfInventory[item.id] ? "Self-attested" : "Not selected"}`)
+      .join("\n");
+
+    return `${writtenResponses}\n\n---\n\nSelf-inventory (self-attestation only; not scored)\n${inventoryResponses}`;
   }
 
   const allResponsesComplete = prompts.every((prompt) => {
@@ -223,8 +251,9 @@ export default function ModuleSubmit() {
         <div className="rounded border border-border p-4 bg-muted/30">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Boundary reminder</p>
           <p className="text-sm text-foreground leading-relaxed">
-            Do not enter offense details, victim names, investigative facts, illegal content descriptions, police facts, or legal strategy.
-            Bring legal details to your attorney and clinical details to your licensed therapist or supervised clinical provider.
+            Do not enter offense details, victim names, investigative facts, illegal content descriptions, police facts, or legal strategy in this app.
+            Use this space for recovery reflection, accountability, boundaries, emotions, and next right actions. Discuss legal details with your attorney
+            and clinical details with your licensed therapist or supervised clinical provider.
           </p>
         </div>
 
@@ -245,11 +274,36 @@ export default function ModuleSubmit() {
           </div>
         ))}
 
+        {weekNumber === 1 && (
+          <section className="rounded border border-border bg-card p-5 space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-foreground">Review / self-inventory</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Check any areas that need attention this week. This is self-attestation only, not a score, risk indicator, relapse prediction,
+                clinical conclusion, or success/failure rating.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {WEEK_ONE_SELF_INVENTORY.map((item) => (
+                <label key={item.id} className="flex items-start gap-3 rounded border border-border bg-muted/20 p-3 text-sm text-foreground">
+                  <Checkbox
+                    checked={!!selfInventory[item.id]}
+                    onCheckedChange={(value) => setInventoryItem(item.id, !!value)}
+                    data-testid={`checkbox-self-inventory-${item.id}`}
+                    className="mt-0.5"
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="commitment" className="text-sm font-medium text-foreground">
             Weekly integrity commitment
           </Label>
-          <p className="text-sm text-muted-foreground">What is one specific integrity commitment you will practice this week?</p>
+          <p className="text-sm text-muted-foreground">What is one concrete, behavioral commitment you will practice for the next 7 days?</p>
           <Textarea
             id="commitment"
             value={commitment}
