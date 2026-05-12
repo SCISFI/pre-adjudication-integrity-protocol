@@ -3,8 +3,6 @@ import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { ArrowRight, CheckCircle2, Circle, LockKeyhole } from "lucide-react";
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
 type Submission = {
   weekNumber: number;
   completedAt: string | Date;
@@ -13,47 +11,10 @@ type Submission = {
 function getUnlockStatus(weekNumber: number, submissions: Submission[]) {
   const currentWeekSubmitted = submissions.some((s) => s.weekNumber === weekNumber);
 
-  if (currentWeekSubmitted) {
-    return {
-      unlocked: true,
-      label: "Submitted",
-      reason: "",
-    };
-  }
-
-  if (weekNumber === 1) {
-    return {
-      unlocked: true,
-      label: "",
-      reason: "",
-    };
-  }
-
-  const previousSubmission = submissions.find((s) => s.weekNumber === weekNumber - 1);
-
-  if (!previousSubmission) {
-    return {
-      unlocked: false,
-      label: "Locked",
-      reason: `Complete Week ${weekNumber - 1} before this module unlocks.`,
-    };
-  }
-
-  const previousCompletedAt = new Date(previousSubmission.completedAt);
-  const unlockDate = new Date(previousCompletedAt.getTime() + SEVEN_DAYS_MS);
-
-  if (Date.now() < unlockDate.getTime()) {
-    return {
-      unlocked: false,
-      label: "Locked",
-      reason: `Next module unlocks after your 7-day reflection period is complete (${unlockDate.toLocaleDateString()}).`,
-    };
-  }
-
   return {
     unlocked: true,
-    label: "",
-    reason: "",
+    label: currentWeekSubmitted ? "Submitted" : "Testing unlocked",
+    reason: "All Phase 1 modules are temporarily unlocked for MVP testing.",
   };
 }
 
@@ -135,7 +96,7 @@ export default function Modules() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          Complete each module's reflection to advance. The next module unlocks only after the prior module is completed and the 7-day reflection period is complete.
+          Testing mode: all Phase 1 modules are temporarily unlocked so the full weekly workflow can be reviewed. The 7-day unlock timing can be restored later.
         </p>
       </div>
     </Layout>
