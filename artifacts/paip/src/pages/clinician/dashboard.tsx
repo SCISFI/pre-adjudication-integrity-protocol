@@ -75,7 +75,7 @@ export default function ClinicianDashboard() {
                   <tr
                     key={p.id}
                     className="hover:bg-muted/20 cursor-pointer transition-colors group"
-                    onClick={() => setLocation(`/clinician/${p.id}`)}
+                    onClick={() => setLocation(`/clinician/participants/${p.id}`)}
                     data-testid={`participant-row-${p.id}`}
                   >
                     <td className="px-4 py-3">

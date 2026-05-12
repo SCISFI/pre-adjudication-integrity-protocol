@@ -56,9 +56,9 @@ function RoleRouter() {
       if (!profile.role) {
         setLocation("/role-select");
       } else if (profile.role === "participant") {
-        setLocation("/dashboard");
+        setLocation("/participant/dashboard");
       } else if (profile.role === "clinician" || profile.role === "clinical_admin") {
-        setLocation("/clinician");
+        setLocation("/clinician/dashboard");
       }
     }
   }, [isAuthenticated, authLoading, profile, profileLoading, setLocation]);
@@ -79,16 +79,17 @@ function Router() {
       <Route path="/onboarding" component={Onboarding} />
 
       {/* Participant */}
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/checkin" component={Checkin} />
-      <Route path="/modules" component={Modules} />
-      <Route path="/modules/:weekNumber/submit" component={ModuleSubmit} />
-      <Route path="/modules/:weekNumber" component={ModuleDetail} />
-      <Route path="/submissions" component={Submissions} />
+      <Route path="/participant/dashboard" component={Dashboard} />
+      <Route path="/participant/daily-check-in" component={Checkin} />
+      <Route path="/participant/week" component={Modules} />
+      <Route path="/participant/week/:weekNumber/submit" component={ModuleSubmit} />
+      <Route path="/participant/week/:weekNumber" component={ModuleDetail} />
+      <Route path="/participant/history" component={Submissions} />
 
       {/* Clinician */}
-      <Route path="/clinician" component={ClinicianDashboard} />
-      <Route path="/clinician/:participantId" component={ParticipantDetail} />
+      <Route path="/clinician/dashboard" component={ClinicianDashboard} />
+      <Route path="/clinician/participants/:participantId/summary" component={ParticipantDetail} />
+      <Route path="/clinician/participants/:participantId" component={ParticipantDetail} />
 
       <Route component={NotFound} />
     </Switch>

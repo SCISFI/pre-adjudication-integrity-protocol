@@ -80,7 +80,7 @@ export default function Onboarding() {
               You have accepted the program acknowledgments and may now begin Week 1.
             </p>
           </div>
-          <Button onClick={() => setLocation("/dashboard")} data-testid="button-go-to-dashboard">
+          <Button onClick={() => setLocation("/participant/dashboard")} data-testid="button-go-to-dashboard">
             Continue to program
           </Button>
         </div>
