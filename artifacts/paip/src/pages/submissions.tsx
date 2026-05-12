@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
 const WEEK_TITLES = [
-  "Orientation and Foundations",
-  "Accountability and Responsibility",
-  "Relationships and Support Systems",
-  "Behavioral Patterns and Integrity Practices",
+  "The Day Everything Changed",
+  "Staying Alive and Grounded",
+  "Legal Trouble Is Not Recovery",
+  "Who Belongs Where",
 ];
 
 export default function Submissions() {

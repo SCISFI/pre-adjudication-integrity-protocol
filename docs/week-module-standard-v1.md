@@ -33,3 +33,13 @@ Self-inventory items may help participants notice areas such as isolation, sleep
 ## Clinician Display Standard
 
 Clinicians may review participant responses as self-attested written content. The app should display each prompt and answer clearly. The app must not summarize, interpret, score, diagnose, predict risk, recommend legal action, or state that a participant is safe or rehabilitated.
+
+
+## Phase 1 Initial Module Themes
+
+The initial Weeks 1-4 module sequence should follow this standard:
+
+1. Week 1: The Day Everything Changed
+2. Week 2: Staying Alive and Grounded
+3. Week 3: Legal Trouble Is Not Recovery
+4. Week 4: Who Belongs Where
