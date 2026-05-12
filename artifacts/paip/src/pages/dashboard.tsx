@@ -4,7 +4,7 @@ import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, ArrowRight } from "lucide-react";
 
-const WEEK_TITLES = ["Orientation and Foundations", "Accountability and Responsibility", "Relationships and Support Systems", "Behavioral Patterns and Integrity Practices"];
+const WEEK_TITLES = ["The Day Everything Changed", "Staying Alive and Grounded", "Legal Trouble Is Not Recovery", "Who Belongs Where"];
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
