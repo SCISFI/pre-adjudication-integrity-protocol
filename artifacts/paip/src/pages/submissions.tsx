@@ -2,6 +2,7 @@ import { useListMySubmissions, getListMySubmissionsQueryKey } from "@workspace/a
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const WEEK_TITLES = [
   "The Day Everything Changed",
@@ -34,7 +35,10 @@ export default function Submissions() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1.5 -ml-2">
+            <ArrowLeft className="h-4 w-4" /> Return to Main Menu
+          </Button>
           <h2 className="text-xl font-semibold text-foreground">My Submissions</h2>
           <p className="text-sm text-muted-foreground mt-1">Weekly reflections and integrity commitments</p>
         </div>
