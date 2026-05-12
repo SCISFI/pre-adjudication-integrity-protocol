@@ -1,4 +1,6 @@
 import express, { type Express } from "express";
+import fs from "node:fs";
+import path from "node:path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
@@ -34,5 +36,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(authMiddleware);
 
 app.use("/api", router);
+
+const clientDistPath = path.resolve(
+  process.cwd(),
+  "artifacts/paip/dist/public",
+);
+const clientIndexPath = path.join(clientDistPath, "index.html");
+
+if (fs.existsSync(clientIndexPath)) {
+  app.use(express.static(clientDistPath));
+
+  app.use((req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
+      next();
+      return;
+    }
+
+    res.sendFile(clientIndexPath);
+  });
+}
 
 export default app;
