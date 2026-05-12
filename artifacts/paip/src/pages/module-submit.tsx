@@ -15,8 +15,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, CheckCircle2, LockKeyhole } from "lucide-react";
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
 type Submission = {
   weekNumber: number;
   completedAt: string | Date;
@@ -87,37 +85,8 @@ const WEEK_ONE_SELF_INVENTORY: SelfInventoryItem[] = [
   { id: "avoid-support", label: "Temptation to avoid therapy/support" },
 ];
 
-function getUnlockStatus(weekNumber: number, submissions: Submission[]) {
-  const currentWeekSubmitted = submissions.some((s) => s.weekNumber === weekNumber);
-
-  if (currentWeekSubmitted) {
-    return { unlocked: true, reason: "" };
-  }
-
-  if (weekNumber === 1) {
-    return { unlocked: true, reason: "" };
-  }
-
-  const previousSubmission = submissions.find((s) => s.weekNumber === weekNumber - 1);
-
-  if (!previousSubmission) {
-    return {
-      unlocked: false,
-      reason: `Complete Week ${weekNumber - 1} before this module unlocks.`,
-    };
-  }
-
-  const previousCompletedAt = new Date(previousSubmission.completedAt);
-  const unlockDate = new Date(previousCompletedAt.getTime() + SEVEN_DAYS_MS);
-
-  if (Date.now() < unlockDate.getTime()) {
-    return {
-      unlocked: false,
-      reason: `Next module unlocks after your 7-day reflection period is complete (${unlockDate.toLocaleDateString()}).`,
-    };
-  }
-
-  return { unlocked: true, reason: "" };
+function getUnlockStatus(_weekNumber: number, _submissions: Submission[]) {
+  return { unlocked: true, reason: "All Phase 1 modules are temporarily unlocked for MVP testing." };
 }
 
 export default function ModuleSubmit() {
