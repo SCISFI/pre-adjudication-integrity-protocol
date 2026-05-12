@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useGetTodayCheckin, useSubmitCheckin, getGetTodayCheckinQueryKey, getListMyCheckinsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 export default function Checkin() {
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
   const [response, setResponse] = useState("");
   const { data: todayCheckin, isLoading } = useGetTodayCheckin({ query: { queryKey: getGetTodayCheckinQueryKey() } });
   const { mutate: submitCheckin, isPending } = useSubmitCheckin({
@@ -25,7 +27,10 @@ export default function Checkin() {
   return (
     <Layout>
       <div className="space-y-6 max-w-xl">
-        <div>
+        <div className="space-y-2">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1.5 -ml-2">
+            <ArrowLeft className="h-4 w-4" /> Return to Main Menu
+          </Button>
           <h2 className="text-xl font-semibold text-foreground">Daily Check-in</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
