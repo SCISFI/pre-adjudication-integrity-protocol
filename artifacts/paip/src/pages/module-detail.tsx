@@ -1,47 +1,24 @@
 import { useRoute, useLocation } from "wouter";
-import { useGetModule, useListMySubmissions, getGetModuleQueryKey, getListMySubmissionsQueryKey } from "@workspace/api-client-react";
+import {
+  useGetModule,
+  useListMySubmissions,
+  getGetModuleQueryKey,
+  getListMySubmissionsQueryKey,
+} from "@workspace/api-client-react";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle2, LockKeyhole } from "lucide-react";
-
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 type Submission = {
   weekNumber: number;
   completedAt: string | Date;
 };
 
-function getUnlockStatus(weekNumber: number, submissions: Submission[]) {
-  const currentWeekSubmitted = submissions.some((s) => s.weekNumber === weekNumber);
-
-  if (currentWeekSubmitted) {
-    return { unlocked: true, reason: "" };
-  }
-
-  if (weekNumber === 1) {
-    return { unlocked: true, reason: "" };
-  }
-
-  const previousSubmission = submissions.find((s) => s.weekNumber === weekNumber - 1);
-
-  if (!previousSubmission) {
-    return {
-      unlocked: false,
-      reason: `Complete Week ${weekNumber - 1} before this module unlocks.`,
-    };
-  }
-
-  const previousCompletedAt = new Date(previousSubmission.completedAt);
-  const unlockDate = new Date(previousCompletedAt.getTime() + SEVEN_DAYS_MS);
-
-  if (Date.now() < unlockDate.getTime()) {
-    return {
-      unlocked: false,
-      reason: `Next module unlocks after your 7-day reflection period is complete (${unlockDate.toLocaleDateString()}).`,
-    };
-  }
-
-  return { unlocked: true, reason: "" };
+function getUnlockStatus(_weekNumber: number, _submissions: Submission[]) {
+  return {
+    unlocked: true,
+    reason: "All Phase 1 modules are temporarily unlocked for MVP testing.",
+  };
 }
 
 function SectionContent({ content }: { content: string }) {
@@ -62,18 +39,27 @@ export default function ModuleDetail() {
   const weekNumber = params ? parseInt(params.weekNumber, 10) : 0;
 
   const { data: mod, isLoading } = useGetModule(weekNumber, {
-    query: { enabled: weekNumber > 0, queryKey: getGetModuleQueryKey(weekNumber) },
+    query: {
+      enabled: weekNumber > 0,
+      queryKey: getGetModuleQueryKey(weekNumber),
+    },
   });
 
-  const { data: submissions } = useListMySubmissions({ query: { queryKey: getListMySubmissionsQueryKey() } });
+  const { data: submissions } = useListMySubmissions({
+    query: { queryKey: getListMySubmissionsQueryKey() },
+  });
   const submissionList = (submissions ?? []) as Submission[];
-  const alreadySubmitted = submissionList.some((s) => s.weekNumber === weekNumber);
+  const alreadySubmitted = submissionList.some(
+    (s) => s.weekNumber === weekNumber,
+  );
   const unlockStatus = getUnlockStatus(weekNumber, submissionList);
 
   if (isLoading) {
     return (
       <Layout>
-        <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Loading…</div>
+        <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">
+          Loading…
+        </div>
       </Layout>
     );
   }
@@ -82,7 +68,12 @@ export default function ModuleDetail() {
     return (
       <Layout>
         <div className="space-y-4">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/modules")} className="gap-1.5">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/modules")}
+            className="gap-1.5"
+          >
             <ArrowLeft className="h-4 w-4" /> Back to modules
           </Button>
           <p className="text-sm text-muted-foreground">Module not found.</p>
@@ -102,18 +93,28 @@ export default function ModuleDetail() {
     return (
       <Layout>
         <div className="space-y-5 max-w-xl">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/modules")} className="gap-1.5 -ml-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/modules")}
+            className="gap-1.5 -ml-2"
+          >
             <ArrowLeft className="h-4 w-4" /> All modules
           </Button>
 
           <div className="rounded border border-border bg-card p-6 space-y-3">
             <div className="flex items-center gap-2">
               <LockKeyhole className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold text-foreground">Week {weekNumber} is locked</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                Week {weekNumber} is locked
+              </h2>
             </div>
-            <p className="text-sm text-muted-foreground">{unlockStatus.reason}</p>
+            <p className="text-sm text-muted-foreground">
+              {unlockStatus.reason}
+            </p>
             <p className="text-xs text-muted-foreground">
-              This is not a punishment. The 7-day reflection period exists to slow the work down and keep the weekly commitment meaningful.
+              This is not a punishment. The 7-day reflection period exists to
+              slow the work down and keep the weekly commitment meaningful.
             </p>
           </div>
         </div>
@@ -125,14 +126,24 @@ export default function ModuleDetail() {
     <Layout>
       <div className="space-y-8 max-w-2xl">
         <div className="space-y-1">
-          <Button variant="ghost" size="sm" onClick={() => setLocation("/modules")} className="gap-1.5 -ml-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLocation("/modules")}
+            className="gap-1.5 -ml-2"
+          >
             <ArrowLeft className="h-4 w-4" /> All modules
           </Button>
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Week {typedMod.weekNumber}</p>
-          <h2 className="text-xl font-semibold text-foreground">{typedMod.title}</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Week {typedMod.weekNumber}
+          </p>
+          <h2 className="text-xl font-semibold text-foreground">
+            {typedMod.title}
+          </h2>
           <p className="text-sm text-muted-foreground">{typedMod.focusArea}</p>
           <p className="text-xs text-muted-foreground pt-2">
-            Plan for about 30 minutes of focused weekly work, not counting daily check-ins.
+            Plan for at least 30 minutes of focused weekly work, not counting
+            daily check-ins.
           </p>
         </div>
 
@@ -146,7 +157,9 @@ export default function ModuleDetail() {
         <div className="space-y-7">
           {typedMod.sections.map((section, i) => (
             <div key={i} className="space-y-2">
-              <h3 className="text-sm font-semibold text-foreground">{section.heading}</h3>
+              <h3 className="text-sm font-semibold text-foreground">
+                {section.heading}
+              </h3>
               <SectionContent content={section.content} />
             </div>
           ))}
@@ -154,11 +167,18 @@ export default function ModuleDetail() {
 
         <div className="pt-4 border-t border-border">
           {alreadySubmitted ? (
-            <Button variant="outline" onClick={() => setLocation("/submissions")} data-testid="button-view-submission">
+            <Button
+              variant="outline"
+              onClick={() => setLocation("/submissions")}
+              data-testid="button-view-submission"
+            >
               View my submission
             </Button>
           ) : (
-            <Button onClick={() => setLocation(`/modules/${weekNumber}/submit`)} data-testid="button-begin-reflection">
+            <Button
+              onClick={() => setLocation(`/modules/${weekNumber}/submit`)}
+              data-testid="button-begin-reflection"
+            >
               Begin weekly reflection
             </Button>
           )}
