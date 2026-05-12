@@ -20,8 +20,16 @@ Participant home view.
 
 Shows current week, daily check-in access, weekly module access, previous completed weeks, and boundary reminders.
 
+### `/participant/week`
+Weekly module list.
+
+Must expose only Weeks 1–4 during the initial MVP.
+
 ### `/participant/week/:weekNumber`
-Weekly lesson and reflection form.
+Weekly lesson view.
+
+### `/participant/week/:weekNumber/submit`
+Weekly reflection form, integrity commitment, and completion attestation.
 
 ### `/participant/daily-check-in`
 Daily check-in form.

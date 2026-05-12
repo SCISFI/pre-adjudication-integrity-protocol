@@ -58,7 +58,7 @@ export default function Modules() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/dashboard")}
+            onClick={() => setLocation("/participant/dashboard")}
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" /> Return to Main Menu
@@ -88,7 +88,7 @@ export default function Modules() {
                   key={mod.weekNumber}
                   onClick={() => {
                     if (!locked) {
-                      setLocation(`/modules/${mod.weekNumber}`);
+                      setLocation(`/participant/week/${mod.weekNumber}`);
                     }
                   }}
                   disabled={locked}

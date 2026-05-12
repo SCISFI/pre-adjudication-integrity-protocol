@@ -34,7 +34,7 @@ function SectionContent({ content }: { content: string }) {
 }
 
 export default function ModuleDetail() {
-  const [, params] = useRoute("/modules/:weekNumber");
+  const [, params] = useRoute("/participant/week/:weekNumber");
   const [, setLocation] = useLocation();
   const weekNumber = params ? parseInt(params.weekNumber, 10) : 0;
 
@@ -71,7 +71,7 @@ export default function ModuleDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/modules")}
+            onClick={() => setLocation("/participant/week")}
             className="gap-1.5"
           >
             <ArrowLeft className="h-4 w-4" /> Back to modules
@@ -96,7 +96,7 @@ export default function ModuleDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/modules")}
+            onClick={() => setLocation("/participant/week")}
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" /> All modules
@@ -129,7 +129,7 @@ export default function ModuleDetail() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation("/modules")}
+            onClick={() => setLocation("/participant/week")}
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" /> All modules
@@ -169,14 +169,14 @@ export default function ModuleDetail() {
           {alreadySubmitted ? (
             <Button
               variant="outline"
-              onClick={() => setLocation("/submissions")}
+              onClick={() => setLocation("/participant/history")}
               data-testid="button-view-submission"
             >
               View my submission
             </Button>
           ) : (
             <Button
-              onClick={() => setLocation(`/modules/${weekNumber}/submit`)}
+              onClick={() => setLocation(`/participant/week/${weekNumber}/submit`)}
               data-testid="button-begin-reflection"
             >
               Begin weekly reflection

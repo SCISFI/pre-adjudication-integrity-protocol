@@ -11,14 +11,14 @@ interface NavItem {
 }
 
 const PARTICIPANT_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/checkin", label: "Daily Check-in", icon: CheckSquare },
-  { href: "/modules", label: "Weekly Modules", icon: BookOpen },
-  { href: "/submissions", label: "My Submissions", icon: FileText },
+  { href: "/participant/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/participant/daily-check-in", label: "Daily Check-in", icon: CheckSquare },
+  { href: "/participant/week", label: "Weekly Modules", icon: BookOpen },
+  { href: "/participant/history", label: "My Submissions", icon: FileText },
 ];
 
 const CLINICIAN_NAV: NavItem[] = [
-  { href: "/clinician", label: "Participants", icon: Users },
+  { href: "/clinician/dashboard", label: "Participants", icon: Users },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

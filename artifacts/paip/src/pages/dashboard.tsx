@@ -77,7 +77,7 @@ export default function Dashboard() {
             {!todayCheckin?.submitted && (
               <Button
                 size="sm"
-                onClick={() => setLocation("/checkin")}
+                onClick={() => setLocation("/participant/daily-check-in")}
                 data-testid="button-goto-checkin"
               >
                 Check in
@@ -97,7 +97,7 @@ export default function Dashboard() {
               return (
                 <button
                   key={week}
-                  onClick={() => setLocation(`/modules/${week}`)}
+                  onClick={() => setLocation(`/participant/week/${week}`)}
                   className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-muted/30 transition-colors group"
                   data-testid={`module-week-${week}`}
                 >

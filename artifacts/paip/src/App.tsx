@@ -1,9 +1,18 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import {
+  Switch,
+  Route,
+  Router as WouterRouter,
+  useLocation,
+  Redirect,
+} from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@workspace/replit-auth-web";
-import { useGetMyProfile, getGetMyProfileQueryKey } from "@workspace/api-client-react";
+import {
+  useGetMyProfile,
+  getGetMyProfileQueryKey,
+} from "@workspace/api-client-react";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
@@ -56,9 +65,12 @@ function RoleRouter() {
       if (!profile.role) {
         setLocation("/role-select");
       } else if (profile.role === "participant") {
-        setLocation("/dashboard");
-      } else if (profile.role === "clinician" || profile.role === "clinical_admin") {
-        setLocation("/clinician");
+        setLocation("/participant/dashboard");
+      } else if (
+        profile.role === "clinician" ||
+        profile.role === "clinical_admin"
+      ) {
+        setLocation("/clinician/dashboard");
       }
     }
   }, [isAuthenticated, authLoading, profile, profileLoading, setLocation]);
@@ -78,17 +90,65 @@ function Router() {
       <Route path="/role-select" component={RoleSelect} />
       <Route path="/onboarding" component={Onboarding} />
 
+      {/* Legacy top-level paths kept as redirects so saved preview URLs do not render NotFound. */}
+      <Route path="/dashboard">
+        <Redirect to="/participant/dashboard" replace />
+      </Route>
+      <Route path="/checkin">
+        <Redirect to="/participant/daily-check-in" replace />
+      </Route>
+      <Route path="/modules">
+        <Redirect to="/participant/week" replace />
+      </Route>
+      <Route path="/modules/:weekNumber/submit">
+        {(params) => (
+          <Redirect
+            to={`/participant/week/${params.weekNumber}/submit`}
+            replace
+          />
+        )}
+      </Route>
+      <Route path="/modules/:weekNumber">
+        {(params) => (
+          <Redirect to={`/participant/week/${params.weekNumber}`} replace />
+        )}
+      </Route>
+      <Route path="/submissions">
+        <Redirect to="/participant/history" replace />
+      </Route>
+      <Route path="/clinician">
+        <Redirect to="/clinician/dashboard" replace />
+      </Route>
+      <Route path="/clinician/:participantId">
+        {(params) => (
+          <Redirect
+            to={`/clinician/participants/${params.participantId}`}
+            replace
+          />
+        )}
+      </Route>
+
       {/* Participant */}
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/checkin" component={Checkin} />
-      <Route path="/modules" component={Modules} />
-      <Route path="/modules/:weekNumber/submit" component={ModuleSubmit} />
-      <Route path="/modules/:weekNumber" component={ModuleDetail} />
-      <Route path="/submissions" component={Submissions} />
+      <Route path="/participant/dashboard" component={Dashboard} />
+      <Route path="/participant/daily-check-in" component={Checkin} />
+      <Route path="/participant/week" component={Modules} />
+      <Route
+        path="/participant/week/:weekNumber/submit"
+        component={ModuleSubmit}
+      />
+      <Route path="/participant/week/:weekNumber" component={ModuleDetail} />
+      <Route path="/participant/history" component={Submissions} />
 
       {/* Clinician */}
-      <Route path="/clinician" component={ClinicianDashboard} />
-      <Route path="/clinician/:participantId" component={ParticipantDetail} />
+      <Route path="/clinician/dashboard" component={ClinicianDashboard} />
+      <Route
+        path="/clinician/participants/:participantId/summary"
+        component={ParticipantDetail}
+      />
+      <Route
+        path="/clinician/participants/:participantId"
+        component={ParticipantDetail}
+      />
 
       <Route component={NotFound} />
     </Switch>
