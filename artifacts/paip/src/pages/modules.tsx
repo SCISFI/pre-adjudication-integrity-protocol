@@ -1,7 +1,8 @@
 import { useListModules, useListMySubmissions, getListMySubmissionsQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
-import { ArrowRight, CheckCircle2, Circle, LockKeyhole } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight, CheckCircle2, Circle, LockKeyhole } from "lucide-react";
 
 type Submission = {
   weekNumber: number;
@@ -37,7 +38,10 @@ export default function Modules() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div>
+        <div className="space-y-2">
+          <Button variant="ghost" size="sm" onClick={() => setLocation("/dashboard")} className="gap-1.5 -ml-2">
+            <ArrowLeft className="h-4 w-4" /> Return to Main Menu
+          </Button>
           <h2 className="text-xl font-semibold text-foreground">Weekly Modules</h2>
           <p className="text-sm text-muted-foreground mt-1">Phase 1 — Weeks 1 through 4</p>
         </div>
