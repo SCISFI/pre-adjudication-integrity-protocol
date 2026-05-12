@@ -13,33 +13,48 @@ export interface CurriculumModule {
 export const CURRICULUM_MODULES: CurriculumModule[] = [
   {
     weekNumber: 1,
-    title: "Orientation and Foundations",
-    focusArea: "Understanding the structure and purpose of this program",
+    title: "The Day Everything Changed",
+    focusArea: "Stabilization, honesty, and first-week recovery-accountability work",
     sections: [
       {
-        heading: "What This Program Is",
-        content:
-          "This program provides a structured space for reflection and accountability during a significant period in your life. It is not therapy, legal counsel, or a risk assessment. It is a structured process designed to support honest self-examination through accountability practices that you own and document. The structure exists to hold space. You hold meaning.",
+        heading: "Opening Orientation",
+        content: `This week begins in a serious moment. Something has happened, been disclosed, been discovered, or reached a point where your life cannot continue as if nothing has changed. The purpose of this assignment is not to explain the legal situation, defend yourself, gather sympathy, or prove that you are safe. The purpose is to slow down, tell the truth about your present reality, and begin structured recovery-accountability work without making the crisis worse.
+
+Set aside approximately 30 minutes of focused time for this week's assignment, not counting daily check-ins. Read the material slowly. Write directly. Do not perform for the app, your clinician, your attorney, your spouse or partner, your family, or anyone else. This is structured recovery-accountability work. It is not therapy, legal advice, forensic evaluation, or a risk assessment.`,
       },
       {
-        heading: "What This Program Is Not",
-        content:
-          "Participation in this program does not constitute treatment, therapy, forensic evaluation, or legal representation. Nothing in this program should be interpreted as legal advice or as a promise regarding any legal outcome. If you have legal questions, direct them to your attorney. If you have clinical or mental health needs, speak with a licensed professional.",
+        heading: "What Changed",
+        content: `The day everything changed may have involved discovery, confrontation, disclosure, arrest, separation, investigation, job consequences, family rupture, or the private realization that secrecy can no longer hold. The details of what happened do not belong in this app. What does belong here is the reality that your patterns, choices, secrecy, avoidance, and emotional survival strategies now require serious attention.
+
+Early crisis often produces panic and a desperate desire to regain control. You may want to explain, minimize, bargain, research, confess everything everywhere, isolate, collapse, or manage how others see you. None of those reactions equals recovery. Recovery begins with staying grounded enough to take the next honest, bounded step.`,
       },
       {
-        heading: "Integrity as a Practice",
-        content:
-          "Integrity is not a destination — it is a practice. It is choosing alignment between your stated values and your actions, repeatedly, even when it is uncomfortable. This week, consider what integrity has meant in your life, and where that alignment has broken down. You do not need to have answers. You need to be willing to look.",
+        heading: "Stabilization Is Not Avoidance",
+        content: `Stabilization means you stop adding damage. It means you do not use panic as permission to pressure others, violate boundaries, hide information from the appropriate professionals, or flood the wrong people with material they should not have to carry. Stabilization also means you do not disappear into isolation, numbness, fantasy, compulsive research, or image management.
+
+The first week is not about solving your life. It is about establishing enough honesty and structure that you can keep doing the work. Your daily check-ins are one part of that structure. This weekly assignment is another. Your attorney, licensed therapist, supervised clinical provider, and appropriate support channels each have different roles. Putting the right truth in the right place is part of accountability.`,
       },
       {
-        heading: "This Week's Focus",
-        content:
-          "This week, you are orienting. You are reading the framework. You are deciding what honest participation means to you. There is no performance required here. There is no audience for your entries except yourself and your assigned clinician, who reviews activity data only.",
+        heading: "Recovery Is Different From Legal Crisis Management",
+        content: `Legal crisis can take over your attention. It can make every conversation feel strategic and every hour feel urgent. But legal crisis is not the same as recovery. A man can be legally focused and still be dishonest with himself. A man can be terrified of consequences and still avoid accountability. A man can want his life back without yet understanding what must change.
+
+This program will not advise you about your case, your charges, your attorney strategy, court, law enforcement, evaluation, sentencing, custody, contact, employment, or reputation. It will ask you to identify present-tense responsibility: what you are facing, what you are tempted to hide, what boundaries you must honor, who needs truthful support information, what belongs with professionals, and what next-right action you will take this week.`,
       },
       {
-        heading: "Reflection Prompt",
+        heading: "Reality Check",
+        content: `Panic may tell you that you have to fix everything immediately. Shame collapse may tell you that you are only your worst choices. Minimization may tell you that this is not as serious as it is. Image management may tell you to focus on what people think instead of what is true. Bargaining may tell you that one dramatic gesture will make the consequences stop. Legal obsession may tell you that recovery can wait until the case is resolved. Isolation may tell you that no one can know how you are really doing.
+
+Treat each of those reactions as information, not instructions. This week, your task is to remain sober-minded enough to tell the truth, use appropriate support, honor boundaries, and take one concrete next-right action. You are not being asked to produce a legal narrative. You are being asked to begin a recovery-accountability practice.`,
+      },
+      {
+        heading: "Boundary Reminder",
         content:
-          "Reflect on the following: What does it mean to you to show up with integrity in a difficult situation? What has accountability looked like in your life when it has gone well? What conditions made that possible?",
+          "Do not enter offense details, victim names, investigative facts, illegal content descriptions, police facts, or legal strategy in this app. Use this space for recovery reflection, accountability, boundaries, emotions, and next right actions. Discuss legal details with your attorney and clinical details with your licensed therapist or supervised clinical provider.",
+      },
+      {
+        heading: "This Week's Written Work",
+        content:
+          "After reading, complete each response field separately. Short answers that avoid the question are not the goal. Stay specific, present-tense, and bounded. If a question touches legal or clinical material, name where that material belongs without describing the details. The work is to practice honesty, role clarity, and containment.",
       },
     ],
   },

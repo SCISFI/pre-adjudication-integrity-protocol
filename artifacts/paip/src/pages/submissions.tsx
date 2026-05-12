@@ -63,8 +63,8 @@ export default function Submissions() {
 
               <div className="px-5 py-4 space-y-4">
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Reflection</p>
-                  <p className="text-sm text-foreground leading-relaxed">{sub.reflectionResponse}</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Structured responses</p>
+                  <pre className="text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">{sub.reflectionResponse}</pre>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Integrity commitment</p>
