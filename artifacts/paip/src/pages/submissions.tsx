@@ -5,6 +5,7 @@ import {
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const WEEK_TITLES = [
   "Orientation Intensive: The First 7 Days",

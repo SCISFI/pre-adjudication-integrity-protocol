@@ -62,7 +62,7 @@ export default function ParticipantDetail() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const participantId = params ? parseInt(params.participantId, 10) : 0;
-  const [summaryGenerated, setSummaryGenerated] = useState(false);
+  const [generatedSummaries, setGeneratedSummaries] = useState<Summary[]>([]);
 
   const { data: detail, isLoading } = useGetClinicianParticipantDetail(participantId, {
     query: {
@@ -80,9 +80,9 @@ export default function ParticipantDetail() {
 
   const { mutate: generateSummary, isPending: summaryPending } = useGenerateParticipationSummary({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (createdSummary) => {
         queryClient.invalidateQueries({ queryKey: getGetParticipationSummariesQueryKey(participantId) });
-        setSummaryGenerated(true);
+        setGeneratedSummaries((current) => [createdSummary as Summary, ...current]);
       },
     },
   });
@@ -111,6 +111,11 @@ export default function ParticipantDetail() {
   const d = detail as ParticipantDetail;
   const p = d.participant;
   const displayName = [p.firstName, p.lastName].filter(Boolean).join(" ") || p.email || `Participant #${p.id}`;
+  const persistedSummaries = (summaries ?? []) as Summary[];
+  const visibleSummaries = [
+    ...generatedSummaries,
+    ...persistedSummaries.filter((summary) => !generatedSummaries.some((generated) => generated.id === summary.id)),
+  ];
 
   return (
     <Layout>
@@ -135,6 +140,29 @@ export default function ParticipantDetail() {
             </div>
           </div>
         </div>
+
+        {p.needsAttention && (
+          <section className="rounded border border-amber-200 bg-amber-50 px-5 py-4 space-y-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-amber-900">Needs Attention clinician guidance</h3>
+                <p className="text-xs text-amber-900 leading-relaxed">
+                  Needs Attention means this participant has had no recorded activity for 7 or more days. This is not a risk score,
+                  relapse indicator, compliance failure, or clinical conclusion. Review recent activity and determine whether
+                  follow-up is appropriate through your normal clinical process.
+                </p>
+              </div>
+            </div>
+            <ul className="list-disc space-y-1 pl-9 text-xs text-amber-900 leading-relaxed">
+              <li>Review last submitted weekly reflection.</li>
+              <li>Review last daily check-in.</li>
+              <li>Consider whether this should be discussed in the next clinical contact.</li>
+              <li>Use normal clinical judgment and existing treatment/support channels.</li>
+              <li>Do not interpret inactivity as relapse, risk, deception, or failure.</li>
+            </ul>
+          </section>
+        )}
 
         {/* Summary stats */}
         <div className="grid grid-cols-4 gap-3">
@@ -257,19 +285,10 @@ export default function ParticipantDetail() {
             {summaryPending ? "Generating…" : "Generate participation summary"}
           </Button>
 
-          {summaryGenerated && (
-            <div className="rounded border border-border bg-amber-50 border-amber-200 px-4 py-3 flex gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-800">
-                A new participation summary has been generated and added below.
-              </p>
-            </div>
-          )}
-
-          {(summaries as Summary[] | undefined) && (summaries as Summary[]).length > 0 && (
+          {visibleSummaries.length > 0 && (
             <div className="space-y-4">
-              {(summaries as Summary[]).map((s) => (
-                <div key={s.id} className="rounded border border-border bg-card overflow-hidden" data-testid={`summary-${s.id}`}>
+              {visibleSummaries.map((s) => (
+                <div key={`${s.id}-${s.generatedAt}`} className="rounded border border-border bg-card overflow-hidden" data-testid={`summary-${s.id}`}>
                   <div className="px-5 py-3 border-b border-border bg-muted/20">
                     <p className="text-xs text-muted-foreground">
                       Generated {new Date(s.generatedAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
