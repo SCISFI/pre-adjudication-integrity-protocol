@@ -291,7 +291,7 @@ function getUnlockStatus(_weekNumber: number, _submissions: Submission[]) {
 }
 
 export default function ModuleSubmit() {
-  const [, params] = useRoute("/modules/:weekNumber/submit");
+  const [, params] = useRoute("/participant/week/:weekNumber/submit");
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const weekNumber = params ? parseInt(params.weekNumber, 10) : 0;
@@ -390,13 +390,13 @@ export default function ModuleSubmit() {
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => setLocation("/modules")}
+              onClick={() => setLocation("/participant/week")}
               data-testid="button-back-modules"
             >
               Back to modules
             </Button>
             <Button
-              onClick={() => setLocation("/submissions")}
+              onClick={() => setLocation("/participant/history")}
               data-testid="button-view-submissions"
             >
               View all submissions
@@ -414,7 +414,7 @@ export default function ModuleSubmit() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation(`/modules/${weekNumber}`)}
+            onClick={() => setLocation(`/participant/week/${weekNumber}`)}
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" /> Back to module
@@ -442,7 +442,7 @@ export default function ModuleSubmit() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setLocation(`/modules/${weekNumber}`)}
+            onClick={() => setLocation(`/participant/week/${weekNumber}`)}
             className="gap-1.5 -ml-2"
           >
             <ArrowLeft className="h-4 w-4" /> Back to module

@@ -57,7 +57,7 @@ export default function Submissions() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setLocation("/modules")}
+              onClick={() => setLocation("/participant/week")}
               data-testid="button-go-modules"
             >
               View weekly modules
