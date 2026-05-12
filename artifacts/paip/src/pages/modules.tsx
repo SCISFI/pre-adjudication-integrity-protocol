@@ -1,8 +1,7 @@
 import { useListModules, useListMySubmissions, getListMySubmissionsQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import Layout from "@/components/layout";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, CheckCircle2, Circle, LockKeyhole } from "lucide-react";
+import { ArrowRight, CheckCircle2, Circle, LockKeyhole } from "lucide-react";
 
 type Submission = {
   weekNumber: number;
