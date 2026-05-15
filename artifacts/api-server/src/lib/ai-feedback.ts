@@ -1,9 +1,17 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-});
+function getClient(): OpenAI | null {
+  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+
+  if (!apiKey) {
+    return null;
+  }
+
+  return new OpenAI({
+    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    apiKey,
+  });
+}
 
 const SYSTEM_PROMPT = `You are a structured program support mentor for The Pre-Adjudication Integrity Protocol (PAIP). Your role is to provide brief, professional, non-clinical, non-legal mentor-style feedback on a participant's weekly reflection and integrity commitment.
 
@@ -39,6 +47,12 @@ export async function generateFeedback(
 Reflection: ${reflectionResponse}
 
 Integrity commitment: ${integrityCommitment}`;
+
+  const client = getClient();
+
+  if (!client) {
+    return "Your submission has been received. Mentor feedback will be available shortly.";
+  }
 
   try {
     const response = await client.chat.completions.create({

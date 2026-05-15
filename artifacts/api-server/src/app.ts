@@ -37,10 +37,14 @@ app.use(authMiddleware);
 
 app.use("/api", router);
 
-const clientDistPath = path.resolve(
-  process.cwd(),
-  "artifacts/paip/dist/public",
-);
+const clientDistPathCandidates = [
+  path.resolve(process.cwd(), "artifacts/paip/dist/public"),
+  path.resolve(import.meta.dirname, "../../paip/dist/public"),
+];
+const clientDistPath =
+  clientDistPathCandidates.find((candidate) =>
+    fs.existsSync(path.join(candidate, "index.html")),
+  ) ?? clientDistPathCandidates[0];
 const clientIndexPath = path.join(clientDistPath, "index.html");
 
 if (fs.existsSync(clientIndexPath)) {
