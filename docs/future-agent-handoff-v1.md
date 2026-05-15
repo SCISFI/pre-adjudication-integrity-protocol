@@ -204,15 +204,15 @@ These are intentional temporary testing choices, not final production decisions:
 
 ## Known Issues and Technical Debt
 
-### 1. Sidebar nested anchor warning
+### 1. Sidebar navigation link rendering
 
-The sidebar layout currently uses Wouter `Link` with a nested `<a>` element. This may produce a hydration warning in the browser console. It is not a known hard crash, but should be cleaned up.
+The sidebar layout has been updated to render Wouter `Link` as the clickable anchor directly, without a nested `<a>` element. This keeps the participant and clinician sidebar paths unchanged while removing the browser console/hydration warning that came from nested anchors.
 
-Recommended fix:
+Verification:
 
-- Update sidebar nav rendering to avoid nested anchors while preserving styling and Wouter navigation.
 - Run typecheck/build.
-- Manually confirm sidebar navigation still works.
+- Run the route smoke check to confirm participant, clinician, and legacy redirect routes still return the SPA shell.
+- Manually confirm sidebar navigation in Replit when a preview environment is available.
 
 ### 2. Daily check-in data model is still text-based
 
