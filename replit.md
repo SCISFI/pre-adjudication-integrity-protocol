@@ -9,7 +9,16 @@ A structured recovery-accountability web app for adult men navigating serious co
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET`, `AI_INTEGRATIONS_OPENAI_BASE_URL`, `AI_INTEGRATIONS_OPENAI_API_KEY`
+- Required env for authenticated app use: `DATABASE_URL` — Postgres connection string. Replit Auth also requires Replit-provided OIDC environment such as `REPL_ID`. AI mentor feedback is optional at startup; set `AI_INTEGRATIONS_OPENAI_BASE_URL` and `AI_INTEGRATIONS_OPENAI_API_KEY` to enable generated feedback instead of the fallback message.
+
+
+## Replit preview and deployment notes
+
+- The default Replit Run button starts the integrated Express app on port 8080 after running the workspace build. The Express app serves both `/api/*` routes and the built Vite frontend from `artifacts/paip/dist/public`.
+- The only externally exposed port is local port 8080 mapped to external port 80. This matches Replit Autoscale requirements and keeps the preview/deployment URL pointed at the same integrated app.
+- `DATABASE_URL` is required for authenticated application flows. Provision the Replit Postgres module or set `DATABASE_URL` in Replit Secrets before expecting login, onboarding, check-ins, modules, or clinician screens to work. Missing AI integration secrets should no longer prevent the preview server from starting; weekly submissions will use the existing fallback feedback message until those secrets are set.
+- After pulling from GitHub, if no preview appears, click Run and check that the `Project` workflow is selected. If it fails immediately with `DATABASE_URL must be set`, provision Postgres or add the `DATABASE_URL` secret, then rerun the workflow.
+- The `Web App` workflow is retained only for frontend-only Vite development. The normal Replit preview should use `Project`, not `Web App`.
 
 ## Stack
 

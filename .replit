@@ -4,7 +4,7 @@ modules = ["nodejs-24", "postgresql-16"]
 router = "path"
 deploymentTarget = "autoscale"
 build = ["pnpm", "run", "build"]
-run = ["sh", "-c", "PORT=8080 node artifacts/api-server/dist/index.mjs"]
+run = ["sh", "-c", "PORT=${PORT:-8080} node artifacts/api-server/dist/index.mjs"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
@@ -15,16 +15,18 @@ runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
-mode = "parallel"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "API Server"
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
 
 [[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Web App"
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm run build && PORT=8080 pnpm --filter @workspace/api-server run start"
+waitForPort = 8080
 
 [[workflows.workflow]]
 name = "API Server"
@@ -65,20 +67,14 @@ path = "scripts/post-merge.sh"
 timeoutMs = 20000
 
 [[ports]]
-localPort = 4175
-externalPort = 3000
-
-[[ports]]
 localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
-externalPort = 8081
+externalPort = 80
 
 [[ports]]
 localPort = 19824
-externalPort = 80
+
+[[ports]]
+localPort = 4175
 
 [nix]
 channel = "stable-25_05"
